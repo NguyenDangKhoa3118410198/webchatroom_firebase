@@ -1,9 +1,15 @@
 import React from 'react';
 import { Row, Col, Button, Typography } from 'antd';
+import { signInWithPopup } from 'firebase/auth';
+import { auth, fbProvider } from '../firebase/config';
 
 const { Title } = Typography;
 
-export default function ChatRoom() {
+export default function Login() {
+   const handleFbLogin = () => {
+      signInWithPopup(auth, fbProvider);
+   };
+
    return (
       <div>
          <Row justify='center' style={{ height: 500 }}>
@@ -14,7 +20,9 @@ export default function ChatRoom() {
                <Button style={{ width: '100%', marginBottom: 5 }}>
                   Login with Google
                </Button>
-               <Button style={{ width: '100%' }}>Login with Facebook</Button>
+               <Button style={{ width: '100%' }} onClick={handleFbLogin}>
+                  Login with Facebook
+               </Button>
             </Col>
          </Row>
       </div>
