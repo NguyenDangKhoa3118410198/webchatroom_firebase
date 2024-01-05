@@ -6,8 +6,9 @@ import { auth, fbProvider } from '../firebase/config';
 const { Title } = Typography;
 
 export default function Login() {
-   const handleFbLogin = () => {
-      signInWithPopup(auth, fbProvider);
+   const handleFbLogin = async () => {
+      const data = await signInWithPopup(auth, fbProvider);
+      console.log({ data });
    };
 
    return (

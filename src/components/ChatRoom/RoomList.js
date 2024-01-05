@@ -39,7 +39,6 @@ export default function RoomList() {
                type='text'
                className='add-room'
                icon={<PlusSquareOutlined />}
-               ghost
             >
                Add Room
             </Button>

@@ -14,7 +14,7 @@ export default function AuthProvider({ children }) {
          if (user) {
             const { displayName, email, uid, photoURL } = user;
             setUser({ displayName, email, uid, photoURL });
-            console.log(user);
+            console.log({ user });
             navigate('/');
             return;
          }
