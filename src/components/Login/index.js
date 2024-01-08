@@ -2,13 +2,28 @@ import React from 'react';
 import { Row, Col, Button, Typography } from 'antd';
 import { signInWithPopup } from 'firebase/auth';
 import { auth, fbProvider } from '../firebase/config';
+import { checkExistsEmmailAndAddDocument } from '../firebase/services';
 
 const { Title } = Typography;
 
 export default function Login() {
    const handleFbLogin = async () => {
-      const data = await signInWithPopup(auth, fbProvider);
-      console.log({ data });
+      try {
+         const { user } = await signInWithPopup(auth, fbProvider);
+
+         await checkExistsEmmailAndAddDocument(
+            {
+               displayName: user.displayName,
+               email: user.email,
+               photoURL: user.photoURL,
+               uid: user.uid,
+               providerId: user.providerData[0].providerId,
+            },
+            'users'
+         );
+      } catch (error) {
+         console.error('Error during Facebook login:', error);
+      }
    };
 
    return (
