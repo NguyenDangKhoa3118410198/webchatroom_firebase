@@ -1,4 +1,5 @@
 import { Avatar, Typography } from 'antd';
+import { formatRelative } from 'date-fns';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -21,15 +22,28 @@ const WrapperStyled = styled.div`
    }
 `;
 
+function formartDate(seconds) {
+   let fortmattedDate = '';
+
+   if (seconds) {
+      fortmattedDate = formatRelative(new Date(seconds * 1000), new Date());
+      fortmattedDate =
+         fortmattedDate.charAt(0).toUpperCase() + fortmattedDate.slice(1);
+   }
+   return fortmattedDate;
+}
+
 export default function Message({ text, displayName, createAt, photoURL }) {
    return (
       <WrapperStyled>
          <div>
             <Avatar size='small' src={photoURL}>
-               A
+               {photoURL ? '' : displayName.charAt(0)?.toUpperCase()}
             </Avatar>
             <Typography.Text className='author'>{displayName}</Typography.Text>
-            <Typography.Text className='date'>{createAt}</Typography.Text>
+            <Typography.Text className='date'>
+               {formartDate(createAt?.seconds)}
+            </Typography.Text>
          </div>
          <div>
             <Typography.Text>{text}</Typography.Text>

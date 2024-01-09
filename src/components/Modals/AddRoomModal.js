@@ -5,7 +5,7 @@ import { addDocument } from '../firebase/services';
 import { AuthContext } from '../Context/AuthProvider';
 
 export default function AddRoomModal() {
-   const { isAddRoomVisiable, setAddRoomVisiable } = useContext(AppContext);
+   const { isAddRoomVisible, setAddRoomVisible } = useContext(AppContext);
    const { uid } = useContext(AuthContext);
 
    const [form] = Form.useForm();
@@ -14,18 +14,18 @@ export default function AddRoomModal() {
       addDocument({ ...form.getFieldValue(), members: [uid] }, 'rooms');
 
       form.resetFields();
-      setAddRoomVisiable(false);
+      setAddRoomVisible(false);
    };
 
    const handleCancel = () => {
       form.resetFields();
-      setAddRoomVisiable(false);
+      setAddRoomVisible(false);
    };
    return (
       <div>
          <Modal
             title='Create room'
-            open={isAddRoomVisiable}
+            open={isAddRoomVisible}
             onOk={handleOk}
             onCancel={handleCancel}
          >

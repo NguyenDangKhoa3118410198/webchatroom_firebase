@@ -1,9 +1,12 @@
 import { UserAddOutlined } from '@ant-design/icons';
 import { Avatar, Button, Tooltip, Form, Input, Alert } from 'antd';
-import React, { useContext } from 'react';
+import React, { useContext, useState, useMemo } from 'react';
 import styled from 'styled-components';
 import Message from './Message';
 import { AppContext } from '../Context/AppProvider';
+import { addDocument } from '../firebase/services';
+import { AuthContext } from '../Context/AuthProvider';
+import useFirestore from '../../hooks/useFirestore';
 
 const HeaderStyled = styled.div`
    display: flex;
@@ -69,11 +72,44 @@ const MessageListStyled = styled.div`
 `;
 
 export default function ChatWindow() {
-   const { selectedRoom, members, setIsInviteMemberVisiable } =
+   const { selectedRoom, members, setIsInviteMemberVisible } =
       useContext(AppContext);
+   const { uid, photoURL, displayName } = useContext(AuthContext);
+   const [inputValue, setInputValue] = useState('');
+   const [form] = Form.useForm();
+
+   const conditionMessage = useMemo(
+      () => ({
+         fieldName: 'roomId',
+         operator: '==',
+         compareValue: selectedRoom.id,
+      }),
+      [selectedRoom.id]
+   );
+
+   const messages = useFirestore('messages', conditionMessage);
+
    if (!selectedRoom) {
       return null;
    }
+
+   const handleInputChange = (e) => {
+      setInputValue(e.target.value);
+   };
+
+   const handleOnSubmit = () => {
+      addDocument(
+         {
+            text: inputValue,
+            uid,
+            photoURL,
+            roomId: selectedRoom.id,
+            displayName,
+         },
+         'messages'
+      );
+      form.resetFields(['message']);
+   };
 
    return (
       <WrapperStyled>
@@ -90,7 +126,7 @@ export default function ChatWindow() {
                      <Button
                         type='text'
                         icon={<UserAddOutlined />}
-                        onClick={() => setIsInviteMemberVisiable(true)}
+                        onClick={() => setIsInviteMemberVisible(true)}
                      >
                         Add member
                      </Button>
@@ -111,34 +147,29 @@ export default function ChatWindow() {
                </HeaderStyled>
                <ContentStyled>
                   <MessageListStyled>
-                     <Message
-                        text='Test'
-                        photoURL={null}
-                        displayName='tung'
-                        createAt={121312311231}
-                     />
-                     <Message
-                        text='Test2'
-                        photoURL={null}
-                        displayName='Nam'
-                        createAt={121312311231}
-                     />
-                     <Message
-                        text='Test1'
-                        photoURL={null}
-                        displayName='Khoa'
-                        createAt={121312311231}
-                     />
+                     {messages.map((message) => (
+                        <Message
+                           key={message.id}
+                           text={message.text}
+                           photoURL={message.photoURL}
+                           displayName={message.displayName}
+                           createAt={message.createdAt}
+                        />
+                     ))}
                   </MessageListStyled>
-                  <Formstyled>
-                     <Form.Item>
+                  <Formstyled form={form}>
+                     <Form.Item name='message'>
                         <Input
                            placeholder='Enter something...'
                            bordered={false}
                            autoComplete='off'
+                           onChange={handleInputChange}
+                           onPressEnter={handleOnSubmit}
                         />
                      </Form.Item>
-                     <Button type='primary'>Send</Button>
+                     <Button type='primary' onClick={handleOnSubmit}>
+                        Send
+                     </Button>
                   </Formstyled>
                </ContentStyled>
             </>

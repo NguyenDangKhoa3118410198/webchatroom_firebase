@@ -22,13 +22,19 @@ function DebounceSelect({ fetchOptions, debounceTimeout = 300, ...props }) {
          setOptions([]);
          setFetching(true);
 
-         fetchOptions(value).then((newOptions) => {
+         fetchOptions(value, props.curmembers).then((newOptions) => {
             setOptions(newOptions);
             setFetching(false);
          });
       };
       return debounce(loadOptions, debounceTimeout);
-   }, [debounceTimeout, fetchOptions]);
+   }, [debounceTimeout, fetchOptions, props.curmembers]);
+
+   React.useEffect(() => {
+      return () => {
+         setOptions([]);
+      };
+   }, []);
 
    return (
       <Select
@@ -57,7 +63,7 @@ function DebounceSelect({ fetchOptions, debounceTimeout = 300, ...props }) {
    );
 }
 
-async function fetchUserList(search) {
+async function fetchUserList(search, curmembers) {
    const querySnapshot = await getDocs(
       query(
          collection(db, 'users'),
@@ -67,19 +73,21 @@ async function fetchUserList(search) {
       )
    );
 
-   const userList = querySnapshot.docs.map((doc) => ({
-      label: doc.data().displayName,
-      value: doc.data().uid,
-      photoURL: doc.data().photoURL,
-   }));
+   const userList = querySnapshot.docs
+      .map((doc) => ({
+         label: doc.data().displayName,
+         value: doc.data().uid,
+         photoURL: doc.data().photoURL,
+      }))
+      .filter((opt) => !curmembers.includes(opt.value));
 
    return userList;
 }
 
 export default function InviteMemberModal() {
    const {
-      isInviteMemberVisiable,
-      setIsInviteMemberVisiable,
+      isInviteMemberVisible,
+      setIsInviteMemberVisible,
       selectedRoomId,
       selectedRoom,
    } = useContext(AppContext);
@@ -88,12 +96,16 @@ export default function InviteMemberModal() {
    const [form] = Form.useForm();
 
    const handleOk = async () => {
+      form.resetFields();
+      setValue([]);
+
       const roomRef = doc(db, 'rooms', selectedRoomId);
 
       try {
          await updateDoc(roomRef, {
             members: [...selectedRoom.members, ...value],
          });
+         setIsInviteMemberVisible(false);
          console.log('Room members updated successfully.');
       } catch (error) {
          console.error('Error updating room members:', error);
@@ -102,13 +114,15 @@ export default function InviteMemberModal() {
 
    const handleCancel = () => {
       form.resetFields();
-      setIsInviteMemberVisiable(false);
+      setValue([]);
+
+      setIsInviteMemberVisible(false);
    };
    return (
       <div>
          <Modal
             title='Invite member'
-            open={isInviteMemberVisiable}
+            open={isInviteMemberVisible}
             onOk={handleOk}
             onCancel={handleCancel}
          >
@@ -121,6 +135,7 @@ export default function InviteMemberModal() {
                   fetchOptions={fetchUserList}
                   onChange={(newValue) => setValue(newValue)}
                   style={{ width: '100%' }}
+                  curmembers={selectedRoom.members}
                />
             </Form>
          </Modal>

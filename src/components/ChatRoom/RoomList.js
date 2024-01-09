@@ -30,11 +30,11 @@ const LinkStyled = styled(Typography.Link)`
 `;
 
 export default function RoomList() {
-   const { rooms, setAddRoomVisiable, setSelectedRoomId } =
+   const { rooms, setAddRoomVisible, setSelectedRoomId } =
       useContext(AppContext);
 
    const handleAddRoom = () => {
-      setAddRoomVisiable(true);
+      setAddRoomVisible(true);
    };
 
    return (
