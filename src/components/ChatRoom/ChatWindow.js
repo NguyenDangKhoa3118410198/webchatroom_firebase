@@ -1,8 +1,9 @@
 import { UserAddOutlined } from '@ant-design/icons';
 import { Avatar, Button, Tooltip, Form, Input } from 'antd';
-import React from 'react';
+import React, { useContext } from 'react';
 import styled from 'styled-components';
 import Message from './Message';
+import { AppContext } from '../Context/AppProvider';
 
 const HeaderStyled = styled.div`
    display: flex;
@@ -68,27 +69,34 @@ const MessageListStyled = styled.div`
 `;
 
 export default function ChatWindow() {
+   const { selectedRoom, members } = useContext(AppContext);
+   if (!selectedRoom) {
+      return null;
+   }
+
    return (
       <WrapperStyled>
          <HeaderStyled>
             <div className='header__info'>
-               <p className='header__title'>room 1</p>
-               <span className='header__description'>Room 1 ne</span>
+               <p className='header__title'>{selectedRoom.name}</p>
+               <span className='header__description'>
+                  {selectedRoom.description}
+               </span>
             </div>
             <ButtonGroupStyled>
                <Button type='text' icon={<UserAddOutlined />}>
                   Add member
                </Button>
                <Avatar.Group size='sm' maxCount={2}>
-                  <Tooltip title='A'>
-                     <Avatar>A</Avatar>
-                  </Tooltip>
-                  <Tooltip title='B'>
-                     <Avatar>B</Avatar>
-                  </Tooltip>
-                  <Tooltip title='C'>
-                     <Avatar>C</Avatar>
-                  </Tooltip>
+                  {members.map((member) => (
+                     <Tooltip title={member.displayName} key={member.uid}>
+                        <Avatar src={member.photoURL}>
+                           {member.photoURL
+                              ? ''
+                              : member.displayName?.chartAt(0)?.toUpperCase()}
+                        </Avatar>
+                     </Tooltip>
+                  ))}
                </Avatar.Group>
             </ButtonGroupStyled>
          </HeaderStyled>
