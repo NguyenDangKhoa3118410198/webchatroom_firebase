@@ -2,7 +2,10 @@ import React from 'react';
 import { Row, Col, Button, Typography } from 'antd';
 import { signInWithPopup } from 'firebase/auth';
 import { auth, fbProvider } from '../firebase/config';
-import { checkExistsEmmailAndAddDocument } from '../firebase/services';
+import {
+   checkExistsEmmailAndAddDocument,
+   generateKeywords,
+} from '../firebase/services';
 
 const { Title } = Typography;
 
@@ -18,6 +21,7 @@ export default function Login() {
                photoURL: user.photoURL,
                uid: user.uid,
                providerId: user.providerData[0].providerId,
+               keywords: generateKeywords(user.displayName),
             },
             'users'
          );

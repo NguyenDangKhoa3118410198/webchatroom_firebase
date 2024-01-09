@@ -6,6 +6,9 @@ export const AppContext = React.createContext();
 
 export default function AppProvider({ children }) {
    const [isAddRoomVisiable, setAddRoomVisiable] = React.useState(false);
+   const [isInviteMemberVisiable, setIsInviteMemberVisiable] =
+      React.useState(false);
+
    const [selectedRoomId, setSelectedRoomId] = React.useState('');
 
    // { rooms
@@ -50,6 +53,8 @@ export default function AppProvider({ children }) {
             setAddRoomVisiable,
             selectedRoomId,
             setSelectedRoomId,
+            isInviteMemberVisiable,
+            setIsInviteMemberVisiable,
          }}
       >
          {children}
