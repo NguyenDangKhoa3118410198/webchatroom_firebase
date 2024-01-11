@@ -31,7 +31,7 @@ export default function UserInfo() {
             </Typography.Text>
          </div>
          <Button
-            ghost
+            type='primary'
             onClick={() => {
                signOut(auth);
             }}

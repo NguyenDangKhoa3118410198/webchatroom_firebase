@@ -17,20 +17,54 @@ const PanelStyled = styled(Panel)`
       }
 
       .add-room {
+         display: flex;
+         justify-content: center;
+         align-items: center;
          color: white;
-         padding: 0;
+         padding: 8px;
       }
    }
 `;
 
 const LinkStyled = styled(Typography.Link)`
-   display: block;
-   margin-bottom: 5px;
-   color: white;
+   display: inline-block;
+   margin-bottom: 8px;
+   width: 100%;
+   border-radius: 10px;
+   padding: 6px;
+   text-align: left;
+   font-size: 15px;
+   font-weight: 500;
+   cursor: pointer;
+   background-color: transparent;
+
+   &:active,
+   &.active {
+      background-color: #fff;
+      color: #6445de !important;
+   }
+
+   &:hover {
+      background-color: #fff;
+      opacity: 0.5;
+      transition: background-color 0.5s ease-in-out;
+   }
+
+   &.ant-typography {
+      color: #fff;
+
+      &:hover {
+         color: #ccc;
+      }
+   }
+`;
+
+const ButtonLogout = styled(Button)`
+   margin-bottom: 10px;
 `;
 
 export default function RoomList() {
-   const { rooms, setAddRoomVisible, setSelectedRoomId } =
+   const { rooms, setAddRoomVisible, setSelectedRoomId, selectedRoomId } =
       useContext(AppContext);
 
    const handleAddRoom = () => {
@@ -44,18 +78,19 @@ export default function RoomList() {
                <LinkStyled
                   key={room.id}
                   onClick={() => setSelectedRoomId(room.id)}
+                  className={selectedRoomId === room.id ? 'active' : ''}
                >
                   {room.name}
                </LinkStyled>
             ))}
-            <Button
-               type='text'
+            <ButtonLogout
+               type='primary'
                className='add-room'
                icon={<PlusSquareOutlined />}
                onClick={handleAddRoom}
             >
                Add Room
-            </Button>
+            </ButtonLogout>
          </PanelStyled>
       </Collapse>
    );

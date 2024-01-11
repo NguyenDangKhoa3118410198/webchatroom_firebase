@@ -52,11 +52,12 @@ const ContentStyled = styled.div`
    justify-content: flex-end;
 `;
 
-const Formstyled = styled(Form)`
+const FormStyled = styled(Form)`
    display: flex;
    justify-content: space-between;
    align-items: center;
-   padding: 2px 2px 2px 0;
+   padding: 6px 6px 6px 0;
+   font-size: 18px;
    border: 1px solid rgba(230, 230, 230);
    border-radius: 2px;
 
@@ -69,6 +70,10 @@ const Formstyled = styled(Form)`
 const MessageListStyled = styled.div`
    max-height: 100vh;
    overflow-y: auto;
+`;
+
+const WrapperButtonInvite = styled.div`
+   margin: 0 4px;
 `;
 
 export default function ChatWindow() {
@@ -123,13 +128,15 @@ export default function ChatWindow() {
                      </span>
                   </div>
                   <ButtonGroupStyled>
-                     <Button
-                        type='text'
-                        icon={<UserAddOutlined />}
-                        onClick={() => setIsInviteMemberVisible(true)}
-                     >
-                        Add member
-                     </Button>
+                     <WrapperButtonInvite>
+                        <Button
+                           type='text'
+                           icon={<UserAddOutlined />}
+                           onClick={() => setIsInviteMemberVisible(true)}
+                        >
+                           Add member
+                        </Button>
+                     </WrapperButtonInvite>
                      <Avatar.Group size='sm' maxCount={2}>
                         {members.map((member) => (
                            <Tooltip title={member.displayName} key={member.uid}>
@@ -157,7 +164,7 @@ export default function ChatWindow() {
                         />
                      ))}
                   </MessageListStyled>
-                  <Formstyled form={form}>
+                  <FormStyled form={form}>
                      <Form.Item name='message'>
                         <Input
                            placeholder='Enter something...'
@@ -170,7 +177,7 @@ export default function ChatWindow() {
                      <Button type='primary' onClick={handleOnSubmit}>
                         Send
                      </Button>
-                  </Formstyled>
+                  </FormStyled>
                </ContentStyled>
             </>
          ) : (
