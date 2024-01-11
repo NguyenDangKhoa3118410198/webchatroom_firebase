@@ -15,6 +15,7 @@ const HeaderStyled = styled.div`
    padding: 0 16px;
    align-items: center;
    border-bottom: 1px solid rgba(230, 230, 230);
+   box-shadow: 0 -6px 10px 2px rgba(0, 0, 0, 0.5);
 
    .header {
       &__info {
@@ -48,7 +49,7 @@ const ContentStyled = styled.div`
    height: calc(96vh - 56px);
    display: flex;
    flex-direction: column;
-   padding: 11px;
+   margin: 0 10px;
    justify-content: flex-end;
 `;
 

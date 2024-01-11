@@ -4,7 +4,9 @@ import React from 'react';
 import styled from 'styled-components';
 
 const WrapperStyled = styled.div`
-   margin-bottom: 10px;
+   margin-bottom: 12px;
+   font-size: 20px;
+   font-weight: 400;
 
    .author {
       margin-left: 5px;
@@ -24,7 +26,11 @@ const WrapperStyled = styled.div`
    .wrapper-message {
       display: flex;
       flex-direction: ${(props) => (props.author ? 'row-reverse' : 'row')};
-      margin-right: ${(props) => (props.author ? '5px' : '0px')};
+      margin-right: ${(props) => (props.author ? '10px' : '25px')};
+      margin-left: ${(props) => (props.author ? '25px' : '10px')};
+      background-color: ${(props) => (props.author ? '#4D90FE' : '#C8EFDD')};
+      border-radius: 5px;
+      padding: 10px;
    }
 
    .format-message {
@@ -42,6 +48,10 @@ const WrapperStyled = styled.div`
       display: flex;
       flex-direction: ${(props) => (props.author ? 'row-reverse' : 'row')};
       margin-right: ${(props) => (props.author ? '8px' : '0px')};
+   }
+
+   .message {
+      text-align: justify;
    }
 `;
 

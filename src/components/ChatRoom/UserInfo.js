@@ -11,6 +11,7 @@ const WrapperStyled = styled.div`
    justify-content: space-between;
    padding: 12px 16px;
    border-bottom: 1px solid rgba(82, 38, 83);
+   box-shadow: 0 -6px 10px 5px rgba(0, 0, 0, 0.5);
 
    .username {
       color: white;
