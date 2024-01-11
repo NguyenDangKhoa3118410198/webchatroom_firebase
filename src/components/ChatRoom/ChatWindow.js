@@ -161,6 +161,7 @@ export default function ChatWindow() {
                            photoURL={message.photoURL}
                            displayName={message.displayName}
                            createAt={message.createdAt}
+                           author={message.uid === uid}
                         />
                      ))}
                   </MessageListStyled>

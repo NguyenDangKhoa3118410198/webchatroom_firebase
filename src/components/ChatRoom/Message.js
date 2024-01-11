@@ -33,21 +33,77 @@ function formartDate(seconds) {
    return fortmattedDate;
 }
 
-export default function Message({ text, displayName, createAt, photoURL }) {
+export default function Message({
+   text,
+   displayName,
+   createAt,
+   photoURL,
+   author,
+}) {
    return (
       <WrapperStyled>
-         <div>
-            <Avatar size='small' src={photoURL}>
-               {photoURL ? '' : displayName.charAt(0)?.toUpperCase()}
-            </Avatar>
-            <Typography.Text className='author'>{displayName}</Typography.Text>
-            <Typography.Text className='date'>
-               {formartDate(createAt?.seconds)}
-            </Typography.Text>
-         </div>
-         <div>
-            <Typography.Text>{text}</Typography.Text>
-         </div>
+         {author ? (
+            <div
+               style={{
+                  display: 'flex',
+                  flexDirection: 'row-reverse',
+                  marginRight: '5px',
+               }}
+            >
+               <div
+                  style={{
+                     display: 'flex',
+                     flexDirection: 'column',
+                     alignItems: 'flex-end',
+                  }}
+               >
+                  <div
+                     style={{ display: 'flex', flexDirection: 'row-reverse' }}
+                  >
+                     <Avatar size='small' src={photoURL}>
+                        {photoURL ? '' : displayName.charAt(0)?.toUpperCase()}
+                     </Avatar>
+                     <div
+                        className='author-info'
+                        style={{
+                           marginRight: '8px',
+                           display: 'flex',
+                           flexDirection: 'row-reverse',
+                        }}
+                     >
+                        <Typography.Text className='author'>
+                           {displayName}
+                        </Typography.Text>
+                        <Typography.Text className='date'>
+                           {formartDate(createAt?.seconds)}
+                        </Typography.Text>
+                     </div>
+                  </div>
+                  <div className='message' style={{ display: 'flex' }}>
+                     <Typography.Text>{text}</Typography.Text>
+                  </div>
+               </div>
+            </div>
+         ) : (
+            <div>
+               <div style={{ display: 'flex' }}>
+                  <Avatar size='small' src={photoURL}>
+                     {photoURL ? '' : displayName.charAt(0)?.toUpperCase()}
+                  </Avatar>
+                  <div className='author-info'>
+                     <Typography.Text className='author'>
+                        {displayName}
+                     </Typography.Text>
+                     <Typography.Text className='date'>
+                        {formartDate(createAt?.seconds)}
+                     </Typography.Text>
+                  </div>
+               </div>
+               <div className='message'>
+                  <Typography.Text>{text}</Typography.Text>
+               </div>
+            </div>
+         )}
       </WrapperStyled>
    );
 }
