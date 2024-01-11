@@ -20,6 +20,29 @@ const WrapperStyled = styled.div`
    .content {
       margin-left: 30px;
    }
+
+   .wrapper-message {
+      display: flex;
+      flex-direction: ${(props) => (props.author ? 'row-reverse' : 'row')};
+      margin-right: ${(props) => (props.author ? '5px' : '0px')};
+   }
+
+   .format-message {
+      display: flex;
+      flex-direction: column;
+      align-items: ${(props) => (props.author ? 'flex-end' : 'flex-start')};
+   }
+
+   .wrapper-info {
+      display: flex;
+      flex-direction: ${(props) => (props.author ? 'row-reverse' : 'row')};
+   }
+
+   .author-info {
+      display: flex;
+      flex-direction: ${(props) => (props.author ? 'row-reverse' : 'row')};
+      margin-right: ${(props) => (props.author ? '8px' : '0px')};
+   }
 `;
 
 function formartDate(seconds) {
@@ -41,52 +64,10 @@ export default function Message({
    author,
 }) {
    return (
-      <WrapperStyled>
-         {author ? (
-            <div
-               style={{
-                  display: 'flex',
-                  flexDirection: 'row-reverse',
-                  marginRight: '5px',
-               }}
-            >
-               <div
-                  style={{
-                     display: 'flex',
-                     flexDirection: 'column',
-                     alignItems: 'flex-end',
-                  }}
-               >
-                  <div
-                     style={{ display: 'flex', flexDirection: 'row-reverse' }}
-                  >
-                     <Avatar size='small' src={photoURL}>
-                        {photoURL ? '' : displayName.charAt(0)?.toUpperCase()}
-                     </Avatar>
-                     <div
-                        className='author-info'
-                        style={{
-                           marginRight: '8px',
-                           display: 'flex',
-                           flexDirection: 'row-reverse',
-                        }}
-                     >
-                        <Typography.Text className='author'>
-                           {displayName}
-                        </Typography.Text>
-                        <Typography.Text className='date'>
-                           {formartDate(createAt?.seconds)}
-                        </Typography.Text>
-                     </div>
-                  </div>
-                  <div className='message' style={{ display: 'flex' }}>
-                     <Typography.Text>{text}</Typography.Text>
-                  </div>
-               </div>
-            </div>
-         ) : (
-            <div>
-               <div style={{ display: 'flex' }}>
+      <WrapperStyled author={author}>
+         <div className='wrapper-message'>
+            <div className='format-message'>
+               <div className='wrapper-info'>
                   <Avatar size='small' src={photoURL}>
                      {photoURL ? '' : displayName.charAt(0)?.toUpperCase()}
                   </Avatar>
@@ -103,7 +84,7 @@ export default function Message({
                   <Typography.Text>{text}</Typography.Text>
                </div>
             </div>
-         )}
+         </div>
       </WrapperStyled>
    );
 }
