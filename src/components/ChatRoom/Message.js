@@ -10,7 +10,7 @@ const WrapperStyled = styled.div`
 
    .ant-typography {
       font-size: 15px;
-      color: ${(props) => (props.author ? 'white' : 'black')};
+      color: ${(props) => (props.$author ? 'white' : 'black')};
    }
 
    .author {
@@ -31,25 +31,25 @@ const WrapperStyled = styled.div`
 
    .wrapper-message {
       display: flex;
-      flex-direction: ${(props) => (props.author ? 'row-reverse' : 'row')};
-      margin-right: ${(props) => (props.author ? '1rem' : '8rem')};
-      margin-left: ${(props) => (props.author ? '8rem' : '1rem')};
-      background-color: ${(props) => (props.author ? '#4D90FE' : '#f0f0f0')};
+      flex-direction: ${(props) => (props.$author ? 'row-reverse' : 'row')};
+      margin-right: ${(props) => (props.$author ? '1rem' : '8rem')};
+      margin-left: ${(props) => (props.$author ? '8rem' : '1rem')};
+      background-color: ${(props) => (props.$author ? '#4D90FE' : '#f0f0f0')};
       border-radius: 5px;
       padding: 10px;
-      font-weight: 600;
+      font-weight: 400;
       overflow: hidden;
    }
 
    .format-message {
       display: flex;
       flex-direction: column;
-      align-items: ${(props) => (props.author ? 'flex-end' : 'flex-start')};
+      align-items: ${(props) => (props.$author ? 'flex-end' : 'flex-start')};
    }
 
    .wrapper-info {
       display: flex;
-      flex-direction: ${(props) => (props.author ? 'row-reverse' : 'row')};
+      flex-direction: ${(props) => (props.$author ? 'row-reverse' : 'row')};
       margin-bottom: 4px;
       justify-content: center;
       align-items: center;
@@ -57,11 +57,11 @@ const WrapperStyled = styled.div`
 
    .author-info {
       display: flex;
-      flex-direction: ${(props) => (props.author ? 'row-reverse' : 'row')};
-      margin-right: ${(props) => (props.author ? '8px' : '0px')};
+      flex-direction: ${(props) => (props.$author ? 'row-reverse' : 'row')};
+      margin-right: ${(props) => (props.$author ? '8px' : '0px')};
 
       .date {
-         color: ${(props) => (props.author ? 'white' : '')};
+         color: ${(props) => (props.$author ? 'white' : '')};
       }
    }
 
@@ -89,7 +89,7 @@ export default function Message({
    author,
 }) {
    return (
-      <WrapperStyled author={author}>
+      <WrapperStyled $author={author}>
          <div className='wrapper-message'>
             <div className='format-message'>
                <div className='wrapper-info'>

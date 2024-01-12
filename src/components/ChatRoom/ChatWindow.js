@@ -49,7 +49,7 @@ const ContentStyled = styled.div`
    height: calc(96vh - 56px);
    display: flex;
    flex-direction: column;
-   margin: 0 10px;
+   margin: 5px 10px;
    justify-content: flex-end;
 `;
 
