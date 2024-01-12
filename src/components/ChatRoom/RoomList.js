@@ -22,6 +22,10 @@ const PanelStyled = styled(Panel)`
          align-items: center;
          color: white;
          padding: 8px;
+
+         &.ant-btn:hover {
+            border-color: #fff;
+         }
       }
    }
 `;
@@ -41,7 +45,7 @@ const LinkStyled = styled(Typography.Link)`
    &:active,
    &.active {
       background-color: #fff;
-      color: #6445de !important;
+      color: #4d90fe !important;
    }
 
    &:hover {
@@ -59,8 +63,8 @@ const LinkStyled = styled(Typography.Link)`
    }
 `;
 
-const ButtonLogout = styled(Button)`
-   margin-bottom: 10px;
+const ButtonAddRoomStyled = styled(Button)`
+   margin: 10px 0;
 `;
 
 export default function RoomList() {
@@ -83,14 +87,14 @@ export default function RoomList() {
                   {room.name}
                </LinkStyled>
             ))}
-            <ButtonLogout
+            <ButtonAddRoomStyled
                type='primary'
                className='add-room'
                icon={<PlusSquareOutlined />}
                onClick={handleAddRoom}
             >
                Add Room
-            </ButtonLogout>
+            </ButtonAddRoomStyled>
          </PanelStyled>
       </Collapse>
    );
