@@ -8,9 +8,15 @@ const WrapperStyled = styled.div`
    font-size: 20px;
    font-weight: 400;
 
+   .ant-typography {
+      font-size: 15px;
+      color: ${(props) => (props.author ? 'white' : 'black')};
+   }
+
    .author {
       margin-left: 5px;
       font-weight: bold;
+      color: black;
    }
 
    .date {
@@ -26,11 +32,13 @@ const WrapperStyled = styled.div`
    .wrapper-message {
       display: flex;
       flex-direction: ${(props) => (props.author ? 'row-reverse' : 'row')};
-      margin-right: ${(props) => (props.author ? '10px' : '25px')};
-      margin-left: ${(props) => (props.author ? '25px' : '10px')};
-      background-color: ${(props) => (props.author ? '#4D90FE' : '#C8EFDD')};
+      margin-right: ${(props) => (props.author ? '1rem' : '8rem')};
+      margin-left: ${(props) => (props.author ? '8rem' : '1rem')};
+      background-color: ${(props) => (props.author ? '#4D90FE' : '#f0f0f0')};
       border-radius: 5px;
       padding: 10px;
+      font-weight: 600;
+      overflow: hidden;
    }
 
    .format-message {
@@ -42,12 +50,19 @@ const WrapperStyled = styled.div`
    .wrapper-info {
       display: flex;
       flex-direction: ${(props) => (props.author ? 'row-reverse' : 'row')};
+      margin-bottom: 4px;
+      justify-content: center;
+      align-items: center;
    }
 
    .author-info {
       display: flex;
       flex-direction: ${(props) => (props.author ? 'row-reverse' : 'row')};
       margin-right: ${(props) => (props.author ? '8px' : '0px')};
+
+      .date {
+         color: ${(props) => (props.author ? 'white' : '')};
+      }
    }
 
    .message {
@@ -78,7 +93,7 @@ export default function Message({
          <div className='wrapper-message'>
             <div className='format-message'>
                <div className='wrapper-info'>
-                  <Avatar size='small' src={photoURL}>
+                  <Avatar size='default' src={photoURL}>
                      {photoURL ? '' : displayName.charAt(0)?.toUpperCase()}
                   </Avatar>
                   <div className='author-info'>
