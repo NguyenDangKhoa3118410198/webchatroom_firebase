@@ -2,12 +2,20 @@ import React from 'react';
 import { Row, Col, Button, Typography } from 'antd';
 import { signInWithPopup } from 'firebase/auth';
 import { auth, fbProvider } from '../firebase/config';
+import { FacebookOutlined } from '@ant-design/icons';
 import {
    checkExistsEmmailAndAddDocument,
    generateKeywords,
 } from '../firebase/services';
+import styled from 'styled-components';
 
 const { Title } = Typography;
+
+const ButtonStyled = styled(Button)`
+   width: 100%;
+   background-color: #0866ff;
+   color: #fff;
+`;
 
 export default function Login() {
    const handleFbLogin = async () => {
@@ -37,12 +45,12 @@ export default function Login() {
                <Title style={{ textAlign: 'center' }} level={3}>
                   Chat room
                </Title>
-               <Button style={{ width: '100%', marginBottom: 5 }}>
-                  Login with Google
-               </Button>
-               <Button style={{ width: '100%' }} onClick={handleFbLogin}>
+               <ButtonStyled
+                  icon={<FacebookOutlined />}
+                  onClick={handleFbLogin}
+               >
                   Login with Facebook
-               </Button>
+               </ButtonStyled>
             </Col>
          </Row>
       </div>
