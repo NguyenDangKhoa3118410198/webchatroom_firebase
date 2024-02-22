@@ -1,6 +1,6 @@
 import { UserAddOutlined } from '@ant-design/icons';
 import { Avatar, Button, Tooltip, Form, Input, Alert } from 'antd';
-import React, { useContext, useState, useMemo, useRef, useEffect } from 'react';
+import React, { useContext, useState, useMemo, useRef } from 'react';
 import styled from 'styled-components';
 import Message from './Message';
 import { AppContext } from '../Context/AppProvider';
@@ -60,7 +60,8 @@ const FormStyled = styled(Form)`
    padding: 6px 6px 6px 0;
    font-size: 18px;
    border: 1px solid rgba(230, 230, 230);
-   border-radius: 2px;
+   border-radius: 5px;
+   margin-bottom: 6px;
 
    .ant-form-item {
       flex: 1;
