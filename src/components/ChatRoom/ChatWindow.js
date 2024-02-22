@@ -1,6 +1,6 @@
 import { UserAddOutlined } from '@ant-design/icons';
 import { Avatar, Button, Tooltip, Form, Input, Alert } from 'antd';
-import React, { useContext, useState, useMemo } from 'react';
+import React, { useContext, useState, useMemo, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import Message from './Message';
 import { AppContext } from '../Context/AppProvider';
@@ -83,6 +83,13 @@ export default function ChatWindow() {
    const { uid, photoURL, displayName } = useContext(AuthContext);
    const [inputValue, setInputValue] = useState('');
    const [form] = Form.useForm();
+   const messagesEndRef = useRef(null);
+
+   const scrollToBottom = () => {
+      if (messagesEndRef.current) {
+         messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      }
+   };
 
    const conditionMessage = useMemo(
       () => ({
@@ -165,6 +172,9 @@ export default function ChatWindow() {
                            author={message.uid === uid}
                         />
                      ))}
+                     <div ref={messagesEndRef} />
+
+                     {scrollToBottom()}
                   </MessageListStyled>
                   <FormStyled form={form}>
                      <Form.Item name='message'>
