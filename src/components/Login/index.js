@@ -13,7 +13,7 @@ const { Title } = Typography;
 
 const ButtonStyled = styled(Button)`
    width: 100%;
-   background-color: #0866ff;
+   background-color: #000;
    color: #fff;
 `;
 
