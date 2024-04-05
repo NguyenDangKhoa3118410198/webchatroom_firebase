@@ -24,8 +24,8 @@ const useFirestore = (collectionName, condition) => {
                condition.fieldName,
                condition.operator,
                condition.compareValue
-            ),
-            orderBy('createdAt')
+            )
+            // orderBy('createdAt')
          );
       }
 
