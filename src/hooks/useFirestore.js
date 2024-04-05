@@ -18,15 +18,21 @@ const useFirestore = (collectionName, condition) => {
          if (!condition.compareValue || !condition.compareValue.length) {
             return;
          }
-         collectionRef = query(
+
+         let queryRef = query(
             collectionRef,
             where(
                condition.fieldName,
                condition.operator,
                condition.compareValue
             )
-            // orderBy('createdAt')
          );
+
+         if (collectionName === 'messages') {
+            queryRef = query(queryRef, orderBy('createdAt'));
+         }
+
+         collectionRef = queryRef;
       }
 
       const unsubscribe = onSnapshot(collectionRef, (snapshot) => {

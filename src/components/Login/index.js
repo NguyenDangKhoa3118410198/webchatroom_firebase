@@ -1,8 +1,8 @@
 import React from 'react';
 import { Row, Col, Button, Typography } from 'antd';
 import { signInWithPopup } from 'firebase/auth';
-import { auth, fbProvider } from '../firebase/config';
-import { FacebookOutlined } from '@ant-design/icons';
+import { auth, fbProvider, googleProvider } from '../firebase/config';
+import { FacebookOutlined, GoogleOutlined } from '@ant-design/icons';
 import {
    checkExistsEmmailAndAddDocument,
    generateKeywords,
@@ -38,6 +38,26 @@ export default function Login() {
       }
    };
 
+   const handleGoogleLogin = async () => {
+      try {
+         const { user } = await signInWithPopup(auth, googleProvider);
+
+         await checkExistsEmmailAndAddDocument(
+            {
+               displayName: user.displayName,
+               email: user.email,
+               photoURL: user.photoURL,
+               uid: user.uid,
+               providerId: user.providerData[0].providerId,
+               keywords: generateKeywords(user.displayName),
+            },
+            'users'
+         );
+      } catch (error) {
+         console.error('Error during Facebook login:', error);
+      }
+   };
+
    return (
       <div>
          <Row justify='center' style={{ height: 500 }}>
@@ -50,6 +70,12 @@ export default function Login() {
                   onClick={handleFbLogin}
                >
                   Login with Facebook
+               </ButtonStyled>
+               <ButtonStyled
+                  icon={<GoogleOutlined />}
+                  onClick={handleGoogleLogin}
+               >
+                  Login with Google
                </ButtonStyled>
             </Col>
          </Row>
