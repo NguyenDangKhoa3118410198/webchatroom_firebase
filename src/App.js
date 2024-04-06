@@ -10,16 +10,18 @@ import InviteMemberModal from './components/Modals/InviteMemberModal';
 function App() {
    return (
       <Router>
-         <AuthProvider>
-            <AppProvider>
-               <Routes>
-                  <Route path='/login' element={<Login />} />
-                  <Route path='/' element={<ChatRoom />} />
-               </Routes>
-               <AddRoomModal />
-               <InviteMemberModal />
-            </AppProvider>
-         </AuthProvider>
+         <div className='app-container'>
+            <AuthProvider>
+               <AppProvider>
+                  <Routes>
+                     <Route path='/login' element={<Login />} />
+                     <Route path='/' element={<ChatRoom />} />
+                  </Routes>
+                  <AddRoomModal />
+                  <InviteMemberModal />
+               </AppProvider>
+            </AuthProvider>
+         </div>
       </Router>
    );
 }
