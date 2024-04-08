@@ -6,7 +6,7 @@ import styled from 'styled-components';
 
 const SidebarStyled = styled.div`
    background: #4d90fe;
-   height: 100%;
+   height: 100vh;
    overflow-y: auto;
 
    :where(.css-dev-only-do-not-override-17sses9).ant-collapse

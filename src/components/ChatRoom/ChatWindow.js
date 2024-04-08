@@ -42,7 +42,7 @@ const ButtonGroupStyled = styled.div`
 `;
 
 const WrapperStyled = styled.div`
-   height: 100vh;
+   height: 100%;
 `;
 
 const ContentStyled = styled.div`
@@ -57,11 +57,10 @@ const FormStyled = styled(Form)`
    display: flex;
    justify-content: space-between;
    align-items: center;
-   padding: 6px 6px 6px 0;
+   padding: 0.5rem 0.4rem;
    font-size: 18px;
    border: 1px solid rgba(230, 230, 230);
    border-radius: 5px;
-   margin-bottom: 6px;
 
    .ant-form-item {
       flex: 1;
@@ -198,7 +197,7 @@ export default function ChatWindow() {
                message='Please choose a room.'
                type='info'
                showIcon
-               style={{ margin: 5 }}
+               style={{ margin: '5px' }}
                closable
             />
          )}

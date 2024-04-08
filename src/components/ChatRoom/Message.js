@@ -10,6 +10,7 @@ const WrapperStyled = styled.div`
    margin-bottom: 12px;
    font-size: 20px;
    font-weight: 400;
+   font-size: 16px;
 
    .ant-typography {
       font-size: 15px;
@@ -17,14 +18,12 @@ const WrapperStyled = styled.div`
    }
 
    .author {
-      margin-left: 5px;
       font-weight: bold;
       color: black;
    }
 
    .date {
-      margin-left: 10px;
-      font-size: 12px;
+      font-size: 11px;
       color: #a7a7a7;
    }
 
@@ -33,14 +32,14 @@ const WrapperStyled = styled.div`
    }
 
    .wrapper-message {
-      width: fit-content;
+      min-width: 150px;
       display: flex;
       flex-direction: ${(props) => (props.$author ? 'row-reverse' : 'row')};
       margin-right: ${(props) => (props.$author ? '1rem' : '8rem')};
       margin-left: ${(props) => (props.$author ? '8rem' : '1rem')};
       background-color: ${(props) => (props.$author ? '#4D90FE' : '#f0f0f0')};
       border-radius: 5px;
-      padding: 10px;
+      padding: 0.6rem;
       font-weight: 400;
       overflow: hidden;
    }
@@ -53,20 +52,35 @@ const WrapperStyled = styled.div`
 
    .wrapper-info {
       display: flex;
+      flex-wrap: wrap;
       flex-direction: ${(props) => (props.$author ? 'row-reverse' : 'row')};
       margin-bottom: 4px;
-      justify-content: center;
-      align-items: center;
+      gap: 5px;
+   }
+
+   .avatar-custom {
+      min-width: 30px;
+      min-height: 30px;
+      width: 30px;
+      height: 30px;
    }
 
    .author-info {
       display: flex;
       flex-direction: ${(props) => (props.$author ? 'row-reverse' : 'row')};
-      margin-right: ${(props) => (props.$author ? '8px' : '0px')};
+      gap: 5px;
+      justify-content: center;
+      align-items: center;
+   }
 
-      .date {
-         color: ${(props) => (props.$author ? 'white' : '')};
-      }
+   .message-date {
+      display: flex;
+      align-items: center;
+      text-align: center;
+   }
+
+   .date {
+      color: ${(props) => (props.$author ? 'white' : '')};
    }
 
    .message {
@@ -102,13 +116,19 @@ export default function Message({
          <div className='wrapper-message'>
             <div className='format-message'>
                <div className='wrapper-info'>
-                  <Avatar size='default' src={photoURL}>
-                     {photoURL ? '' : displayName.charAt(0)?.toUpperCase()}
-                  </Avatar>
                   <div className='author-info'>
+                     <Avatar
+                        size='default'
+                        src={photoURL}
+                        className='avatar-custom'
+                     >
+                        {photoURL ? '' : displayName.charAt(0)?.toUpperCase()}
+                     </Avatar>
                      <Typography.Text className='author'>
                         {displayName}
                      </Typography.Text>
+                  </div>
+                  <div className='message-date'>
                      <Typography.Text className='date'>
                         {formartDate(createAt?.seconds)}
                      </Typography.Text>
