@@ -38,7 +38,7 @@ const WrapperStyled = styled.div`
       margin-right: ${(props) => (props.$author ? '1rem' : '8rem')};
       margin-left: ${(props) => (props.$author ? '8rem' : '1rem')};
       background-color: ${(props) => (props.$author ? '#4D90FE' : '#f0f0f0')};
-      border-radius: 5px;
+      border-radius: ${(props) => (props.$author ? '8px 16px' : '16px 8px')};
       padding: 0.6rem;
       font-weight: 400;
       overflow: hidden;

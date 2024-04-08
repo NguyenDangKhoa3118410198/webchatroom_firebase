@@ -6,6 +6,8 @@ import AuthProvider from './components/Context/AuthProvider';
 import AppProvider from './components/Context/AppProvider';
 import AddRoomModal from './components/Modals/AddRoomModal';
 import InviteMemberModal from './components/Modals/InviteMemberModal';
+import Loading from './components/Loading';
+import React, { Suspense } from 'react';
 
 function App() {
    return (
@@ -13,12 +15,14 @@ function App() {
          <div className='app-container'>
             <AuthProvider>
                <AppProvider>
-                  <Routes>
-                     <Route path='/login' element={<Login />} />
-                     <Route path='/' element={<ChatRoom />} />
-                  </Routes>
-                  <AddRoomModal />
-                  <InviteMemberModal />
+                  <Suspense fallback={<Loading />}>
+                     <Routes>
+                        <Route path='/login' element={<Login />} />
+                        <Route path='/' element={<ChatRoom />} />
+                     </Routes>
+                     <AddRoomModal />
+                     <InviteMemberModal />
+                  </Suspense>
                </AppProvider>
             </AuthProvider>
          </div>

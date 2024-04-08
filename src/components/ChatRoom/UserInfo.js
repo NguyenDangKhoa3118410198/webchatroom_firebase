@@ -11,7 +11,7 @@ const WrapperStyled = styled.div`
    flex-wrap: wrap;
    justify-content: space-between;
    padding: 1rem 1.2rem;
-   border-bottom: 1px solid rgba(82, 38, 83);
+   border-bottom: 1px solid #eee;
    box-shadow: 0 -6px 10px 5px rgba(0, 0, 0, 0.5);
    align-items: center;
    gap: 1rem;

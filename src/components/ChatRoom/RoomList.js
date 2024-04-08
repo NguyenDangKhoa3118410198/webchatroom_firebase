@@ -5,30 +5,54 @@ import { AppContext } from '../Context/AppProvider';
 import styled from 'styled-components';
 
 const { Panel } = Collapse;
-const PanelStyled = styled(Panel)`
-   &&& {
-      .ant-collapse-header,
-      p {
-         color: white;
-      }
 
-      .ant-collapse-content-box {
-         padding: 0 1rem;
-      }
+const PanelStyled = styled.div`
+   padding: 1rem;
+   p {
+      color: white;
+   }
 
-      .add-room {
-         position: relative;
-         display: flex;
-         justify-content: center;
-         align-items: center;
-         color: white;
+   .ant-collapse-content-box {
+      padding: 0 1rem;
+   }
 
-         &.ant-btn:hover {
-            border-color: #fff;
-         }
+   .add-room {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+
+      &.ant-btn:hover {
+         border-color: #fff;
       }
    }
 `;
+
+// const PanelStyled = styled.div`
+//    &&& {
+//       .ant-collapse-header,
+//       p {
+//          color: white;
+//       }
+
+//       .ant-collapse-content-box {
+//          padding: 0 1rem;
+//       }
+
+//       .add-room {
+//          position: relative;
+//          display: flex;
+//          justify-content: center;
+//          align-items: center;
+//          color: white;
+
+//          &.ant-btn:hover {
+//             border-color: #fff;
+//          }
+//       }
+//    }
+// `;
 
 const LinkStyled = styled(Typography.Link)`
    display: inline-block;
@@ -77,26 +101,28 @@ export default function RoomList() {
    };
 
    return (
-      <Collapse ghost defaultActiveKey={['1']}>
-         <PanelStyled header='List room' key='1'>
-            {rooms.map((room) => (
-               <LinkStyled
-                  key={room.id}
-                  onClick={() => setSelectedRoomId(room.id)}
-                  className={selectedRoomId === room.id ? 'active' : ''}
-               >
-                  {room.name}
-               </LinkStyled>
-            ))}
-            <ButtonAddRoomStyled
-               type='primary'
-               className='add-room'
-               icon={<PlusSquareOutlined />}
-               onClick={handleAddRoom}
+      // <Collapse ghost defaultActiveKey={['1']}>
+      // <PanelStyled header='List room' key='1'>
+      <PanelStyled>
+         {rooms.map((room) => (
+            <LinkStyled
+               key={room.id}
+               onClick={() => setSelectedRoomId(room.id)}
+               className={selectedRoomId === room.id ? 'active' : ''}
             >
-               Add room
-            </ButtonAddRoomStyled>
-         </PanelStyled>
-      </Collapse>
+               {room.name}
+            </LinkStyled>
+         ))}
+         <ButtonAddRoomStyled
+            type='primary'
+            className='add-room'
+            icon={<PlusSquareOutlined />}
+            onClick={handleAddRoom}
+         >
+            Add room
+         </ButtonAddRoomStyled>
+      </PanelStyled>
+      // </PanelStyled>
+      // </Collapse>
    );
 }

@@ -11,7 +11,7 @@ import useFirestore from '../../hooks/useFirestore';
 const HeaderStyled = styled.div`
    display: flex;
    justify-content: space-between;
-   height: 56px;
+   height: 58px;
    padding: 0 16px;
    align-items: center;
    border-bottom: 1px solid rgba(230, 230, 230);
@@ -46,7 +46,7 @@ const WrapperStyled = styled.div`
 `;
 
 const ContentStyled = styled.div`
-   height: calc(96vh - 56px);
+   height: calc(96vh - 58px);
    display: flex;
    flex-direction: column;
    margin: 5px 10px;
