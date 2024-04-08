@@ -13,15 +13,15 @@ const PanelStyled = styled(Panel)`
       }
 
       .ant-collapse-content-box {
-         padding: 0 40px;
+         padding: 0 1rem;
       }
 
       .add-room {
+         position: relative;
          display: flex;
          justify-content: center;
          align-items: center;
          color: white;
-         padding: 8px;
 
          &.ant-btn:hover {
             border-color: #fff;
@@ -64,6 +64,7 @@ const LinkStyled = styled(Typography.Link)`
 `;
 
 const ButtonAddRoomStyled = styled(Button)`
+   width: 100%;
    margin: 10px 0;
 `;
 
@@ -93,7 +94,7 @@ export default function RoomList() {
                icon={<PlusSquareOutlined />}
                onClick={handleAddRoom}
             >
-               Add Room
+               Add room
             </ButtonAddRoomStyled>
          </PanelStyled>
       </Collapse>

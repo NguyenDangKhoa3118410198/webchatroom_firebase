@@ -10,26 +10,43 @@ const WrapperStyled = styled.div`
    display: flex;
    flex-wrap: wrap;
    justify-content: space-between;
-   padding: 12px 16px;
+   padding: 1rem 1.2rem;
    border-bottom: 1px solid rgba(82, 38, 83);
    box-shadow: 0 -6px 10px 5px rgba(0, 0, 0, 0.5);
    align-items: center;
+   gap: 1rem;
+   positon: relative;
 
    .username {
       color: white;
       margin-left: 5px;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
    }
 `;
 
 const UserInfoStyled = styled.div`
-   padding: 0px 5px;
+   padding: 0rem 0.5rem;
+   display: flex;
+   flex-wrap: wrap;
+   justify-content: center;
 `;
 
 const ButtonStyled = styled(Button)`
-   margin: 4px 0px;
+   text-align: center;
+   max-width: 120px;
+   width: 100%;
+   gap: 1rem;
+   flex: 1;
 
    &.ant-btn:hover {
       border-color: #fff;
+   }
+
+   &.ant-btn {
+      padding: 0.2rem;
    }
 `;
 
