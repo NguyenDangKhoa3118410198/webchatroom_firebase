@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { Button, Collapse, Typography } from 'antd';
+import { Button, Typography } from 'antd';
 import { PlusSquareOutlined } from '@ant-design/icons';
 import { AppContext } from '../Context/AppProvider';
 import styled from 'styled-components';
