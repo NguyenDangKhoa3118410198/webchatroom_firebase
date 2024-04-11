@@ -11,10 +11,41 @@ import styled from 'styled-components';
 
 const { Title } = Typography;
 
+const LoginContainer = styled.div`
+   min-width: 400px;
+   height: 100%;
+   padding: 2rem;
+   background-color: #27262c;
+`;
+
+const RowStyled = styled(Row)`
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   width: 100%;
+   height: 500px;
+`;
+
+const TitleStyled = styled(Title)`
+   font-weight: 900;
+   text-transform: uppercase;
+   text-align: center;
+
+   &.ant-typography {
+      color: #eee;
+   }
+`;
+
 const ButtonStyled = styled(Button)`
+   margin: 1rem 0;
    width: 100%;
    background-color: #000;
    color: #fff;
+   padding: 2rem;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   font-size: 1.4rem;
 `;
 
 export default function Login() {
@@ -59,12 +90,10 @@ export default function Login() {
    };
 
    return (
-      <div>
-         <Row justify='center' style={{ height: 500 }}>
+      <LoginContainer>
+         <RowStyled>
             <Col span={8}>
-               <Title style={{ textAlign: 'center' }} level={3}>
-                  Chat room
-               </Title>
+               <TitleStyled level={1}>Chat room</TitleStyled>
                <ButtonStyled
                   icon={<FacebookOutlined />}
                   onClick={handleFbLogin}
@@ -78,7 +107,7 @@ export default function Login() {
                   Login with Google
                </ButtonStyled>
             </Col>
-         </Row>
-      </div>
+         </RowStyled>
+      </LoginContainer>
    );
 }

@@ -33,5 +33,6 @@ html *::-webkit-scrollbar-track {
 }
 
 .app-container {
+   height: 100vh;
    overflow: hidden;
 }
