@@ -4,8 +4,6 @@ import { PlusSquareOutlined } from '@ant-design/icons';
 import { AppContext } from '../Context/AppProvider';
 import styled from 'styled-components';
 
-const { Panel } = Collapse;
-
 const PanelStyled = styled.div`
    padding: 1rem;
    p {
@@ -29,37 +27,12 @@ const PanelStyled = styled.div`
    }
 `;
 
-// const PanelStyled = styled.div`
-//    &&& {
-//       .ant-collapse-header,
-//       p {
-//          color: white;
-//       }
-
-//       .ant-collapse-content-box {
-//          padding: 0 1rem;
-//       }
-
-//       .add-room {
-//          position: relative;
-//          display: flex;
-//          justify-content: center;
-//          align-items: center;
-//          color: white;
-
-//          &.ant-btn:hover {
-//             border-color: #fff;
-//          }
-//       }
-//    }
-// `;
-
 const LinkStyled = styled(Typography.Link)`
    display: inline-block;
-   margin-bottom: 8px;
+   margin-bottom: 5px;
    width: 100%;
    border-radius: 10px;
-   padding: 6px;
+   padding: 10px;
    text-align: left;
    font-size: 15px;
    font-weight: 500;
@@ -90,6 +63,12 @@ const LinkStyled = styled(Typography.Link)`
 const ButtonAddRoomStyled = styled(Button)`
    width: 100%;
    margin: 10px 0;
+
+   @media (max-width: 768px) {
+      .ant-btn-icon {
+         display: none;
+      }
+   }
 `;
 
 export default function RoomList() {
@@ -101,8 +80,6 @@ export default function RoomList() {
    };
 
    return (
-      // <Collapse ghost defaultActiveKey={['1']}>
-      // <PanelStyled header='List room' key='1'>
       <PanelStyled>
          {rooms.map((room) => (
             <LinkStyled
@@ -122,7 +99,5 @@ export default function RoomList() {
             Add room
          </ButtonAddRoomStyled>
       </PanelStyled>
-      // </PanelStyled>
-      // </Collapse>
    );
 }

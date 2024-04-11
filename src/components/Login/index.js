@@ -92,7 +92,7 @@ export default function Login() {
    return (
       <LoginContainer>
          <RowStyled>
-            <Col span={8}>
+            <Col span={14}>
                <TitleStyled level={1}>Chat room</TitleStyled>
                <ButtonStyled
                   icon={<FacebookOutlined />}
