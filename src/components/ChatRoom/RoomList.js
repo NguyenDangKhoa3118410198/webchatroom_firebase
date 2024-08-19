@@ -41,18 +41,18 @@ const LinkStyled = styled(Typography.Link)`
 
    &:active,
    &.active {
-      background-color: #fff;
+      background-color: #000;
       color: #4d90fe !important;
    }
 
    &:hover {
-      background-color: #fff;
+      background-color: #000;
       opacity: 0.5;
       transition: background-color 0.5s ease-in-out;
    }
 
    &.ant-typography {
-      color: #fff;
+      color: #000;
 
       &:hover {
          color: #ccc;

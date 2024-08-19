@@ -4,10 +4,6 @@
    box-sizing: border-box;
 }
 
-html {
-   font-size: 78%;
-}
-
 body {
    font-family: 'Roboto', 'Arial', 'Helvetica', sans-serif;
    -webkit-font-smoothing: antialiased;
@@ -35,4 +31,5 @@ html *::-webkit-scrollbar-track {
 .app-container {
    height: 100vh;
    overflow: hidden;
+   background-color: #f5f5f5;
 }

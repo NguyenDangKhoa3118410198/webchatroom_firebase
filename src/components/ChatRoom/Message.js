@@ -1,5 +1,4 @@
-import { Avatar, Typography } from 'antd';
-import { formatRelative } from 'date-fns';
+import { Avatar, Tooltip, Typography } from 'antd';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -93,15 +92,12 @@ const WrapperStyled = styled.div`
    }
 `;
 
-function formartDate(seconds) {
-   let fortmattedDate = '';
-
-   if (seconds) {
-      fortmattedDate = formatRelative(new Date(seconds * 1000), new Date());
-      fortmattedDate =
-         fortmattedDate.charAt(0).toUpperCase() + fortmattedDate.slice(1);
-   }
-   return fortmattedDate;
+function formatTime(seconds) {
+   if (!seconds) return '';
+   const date = new Date(seconds * 1000);
+   const hours = date.getUTCHours().toString().padStart(2, '0');
+   const minutes = date.getUTCMinutes().toString().padStart(2, '0');
+   return `${hours}:${minutes}`;
 }
 
 export default function Message({
@@ -113,32 +109,41 @@ export default function Message({
 }) {
    return (
       <WrapperStyled $author={author}>
-         <div className='wrapper-message'>
-            <div className='format-message'>
-               <div className='wrapper-info'>
-                  <div className='author-info'>
-                     <Avatar
-                        size='default'
-                        src={photoURL}
-                        className='avatar-custom'
-                     >
-                        {photoURL ? '' : displayName.charAt(0)?.toUpperCase()}
-                     </Avatar>
-                     <Typography.Text className='author'>
-                        {displayName}
-                     </Typography.Text>
-                  </div>
-                  <div className='message-date'>
-                     <Typography.Text className='date'>
-                        {formartDate(createAt?.seconds)}
-                     </Typography.Text>
-                  </div>
+         <Tooltip
+            color='#fff'
+            placement='left'
+            title={
+               <div className='message-date'>
+                  <Typography.Text className='date'>
+                     {formatTime(createAt?.seconds)}
+                  </Typography.Text>
                </div>
-               <div className='message'>
-                  <Typography.Text>{text}</Typography.Text>
+            }
+         >
+            <div className='wrapper-message'>
+               <div className='format-message'>
+                  <div className='wrapper-info'>
+                     <div className='author-info'>
+                        <Avatar
+                           size='default'
+                           src={photoURL}
+                           className='avatar-custom'
+                        >
+                           {photoURL
+                              ? ''
+                              : displayName.charAt(0)?.toUpperCase()}
+                        </Avatar>
+                        <Typography.Text className='author'>
+                           {displayName}
+                        </Typography.Text>
+                     </div>
+                  </div>
+                  <div className='message'>
+                     <Typography.Text>{text}</Typography.Text>
+                  </div>
                </div>
             </div>
-         </div>
+         </Tooltip>
       </WrapperStyled>
    );
 }

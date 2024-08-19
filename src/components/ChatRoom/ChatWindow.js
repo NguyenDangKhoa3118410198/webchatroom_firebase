@@ -8,75 +8,6 @@ import { addDocument } from '../firebase/services';
 import { AuthContext } from '../Context/AuthProvider';
 import useFirestore from '../../hooks/useFirestore';
 
-const HeaderStyled = styled.div`
-   display: flex;
-   justify-content: space-between;
-   height: 58px;
-   padding: 0 16px;
-   align-items: center;
-   border-bottom: 1px solid rgba(230, 230, 230);
-   box-shadow: 0 -6px 10px 2px rgba(0, 0, 0, 0.5);
-
-   .header {
-      &__info {
-         display: flex;
-         flex-direction: column;
-         justify-content: center;
-         font-size: 16px;
-      }
-
-      &__title {
-         margin: 0;
-         font-weight: bold;
-      }
-
-      &__description {
-         font-size: 12px;
-      }
-   }
-`;
-
-const ButtonGroupStyled = styled.div`
-   display: flex;
-   align-items: center;
-`;
-
-const WrapperStyled = styled.div`
-   height: 100%;
-`;
-
-const ContentStyled = styled.div`
-   height: calc(96vh - 58px);
-   display: flex;
-   flex-direction: column;
-   margin: 5px 10px;
-   justify-content: flex-end;
-`;
-
-const FormStyled = styled(Form)`
-   display: flex;
-   justify-content: space-between;
-   align-items: center;
-   padding: 0.5rem 0.4rem;
-   font-size: 18px;
-   border: 1px solid rgba(230, 230, 230);
-   border-radius: 5px;
-
-   .ant-form-item {
-      flex: 1;
-      margin-bottom: 0;
-   }
-`;
-
-const MessageListStyled = styled.div`
-   max-height: 100vh;
-   overflow-y: auto;
-`;
-
-const WrapperButtonInvite = styled.div`
-   margin: 0 4px;
-`;
-
 export default function ChatWindow() {
    const { selectedRoom, members, setIsInviteMemberVisible } =
       useContext(AppContext);
@@ -124,6 +55,15 @@ export default function ChatWindow() {
       form.resetFields(['message']);
    };
 
+   function formatDate(seconds) {
+      if (!seconds) return '';
+
+      const date = new Date(seconds * 1000);
+      return date.toISOString().split('T')[0];
+   }
+
+   let lastDate = '';
+
    return (
       <WrapperStyled>
          {selectedRoom.id ? (
@@ -162,25 +102,40 @@ export default function ChatWindow() {
                </HeaderStyled>
                <ContentStyled>
                   <MessageListStyled>
-                     {messages.map((message) => (
-                        <Message
-                           key={message.id}
-                           text={message.text}
-                           photoURL={message.photoURL}
-                           displayName={message.displayName}
-                           createAt={message.createdAt}
-                           author={message.uid === uid}
-                        />
-                     ))}
-                     <div ref={messagesEndRef} />
+                     {messages.map((message) => {
+                        const messageDate = formatDate(
+                           message?.createdAt?.seconds
+                        );
+                        const showDivider =
+                           messageDate !== lastDate && lastDate !== '';
 
+                        lastDate = messageDate;
+
+                        return (
+                           <React.Fragment key={message.id}>
+                              {showDivider && (
+                                 <DividerStyled>{messageDate}</DividerStyled>
+                              )}
+                              <Message
+                                 text={message.text}
+                                 photoURL={message.photoURL}
+                                 displayName={message.displayName}
+                                 createAt={message.createdAt}
+                                 author={message.uid === uid}
+                              />
+                           </React.Fragment>
+                        );
+                     })}
+                     <div ref={messagesEndRef} />
                      {scrollToBottom()}
                   </MessageListStyled>
                   <FormStyled form={form}>
-                     <Form.Item name='message'>
-                        <Input
+                     <Form.Item
+                        name='message'
+                        style={{ flex: 1, marginBottom: 0 }}
+                     >
+                        <InputStyled
                            placeholder='Enter something...'
-                           bordered={false}
                            autoComplete='off'
                            onChange={handleInputChange}
                            onPressEnter={handleOnSubmit}
@@ -197,10 +152,103 @@ export default function ChatWindow() {
                message='Please choose a room.'
                type='info'
                showIcon
-               style={{ margin: '5px' }}
                closable
+               style={{ margin: '10px' }}
             />
          )}
       </WrapperStyled>
    );
 }
+
+const WrapperStyled = styled.div`
+   margin: 20px 10px 20px 10px;
+   border-radius: 12px;
+   box-shadow: rgba(52, 72, 84, 0.05) 0px 0px 8px 0px;
+   background-color: #fff;
+   height: calc(100vh - 40px);
+   flex: 2;
+`;
+
+const HeaderStyled = styled.div`
+   display: flex;
+   justify-content: space-between;
+   height: 58px;
+   padding: 0 16px;
+   align-items: center;
+
+   .header {
+      &__info {
+         display: flex;
+         flex-direction: column;
+         justify-content: center;
+         font-size: 16px;
+      }
+
+      &__title {
+         margin: 0;
+         font-weight: bold;
+      }
+
+      &__description {
+         font-size: 12px;
+      }
+   }
+`;
+
+const ButtonGroupStyled = styled.div`
+   display: flex;
+   align-items: center;
+`;
+
+const ContentStyled = styled.div`
+   height: calc(96vh - 88px);
+   display: flex;
+   flex-direction: column;
+   margin: 5px 10px;
+   justify-content: flex-end;
+`;
+
+const FormStyled = styled(Form)`
+   display: flex;
+   align-items: center;
+   width: 100%;
+`;
+
+const InputStyled = styled(Input)`
+   flex: 1;
+   margin-right: 8px;
+`;
+
+const MessageListStyled = styled.div`
+   overflow-y: auto;
+`;
+
+const WrapperButtonInvite = styled.div`
+   margin: 0 4px;
+`;
+
+const DividerStyled = styled.div`
+   margin: 20px 0;
+   text-align: center;
+   color: #999;
+   font-size: 14px;
+   position: relative;
+
+   &::before,
+   &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 45%;
+      height: 1px;
+      background-color: #ccc;
+   }
+
+   &::before {
+      left: 0;
+   }
+
+   &::after {
+      right: 0;
+   }
+`;

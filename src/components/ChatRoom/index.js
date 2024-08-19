@@ -1,19 +1,21 @@
 import React from 'react';
-import { Row, Col } from 'antd';
 import Sidebar from './Sidebar';
 import ChatWindow from './ChatWindow';
+import styled from 'styled-components';
+
+const ChatRoomWrapper = styled.div`
+   display: flex;
+   max-width: 1440px;
+   left: 50%;
+   position: relative;
+   transform: translateX(-50%);
+`;
 
 export default function ChatRoom() {
    return (
-      <div>
-         <Row>
-            <Col span={6}>
-               <Sidebar />
-            </Col>
-            <Col span={18}>
-               <ChatWindow />
-            </Col>
-         </Row>
-      </div>
+      <ChatRoomWrapper>
+         <Sidebar />
+         <ChatWindow />
+      </ChatRoomWrapper>
    );
 }
