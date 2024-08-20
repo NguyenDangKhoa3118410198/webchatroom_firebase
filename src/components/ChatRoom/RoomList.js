@@ -1,6 +1,5 @@
 import React, { useContext } from 'react';
-import { Avatar, Button, Typography } from 'antd';
-import { PlusSquareOutlined } from '@ant-design/icons';
+import { Avatar, Typography } from 'antd';
 import { AppContext } from '../Context/AppProvider';
 import styled from 'styled-components';
 
@@ -25,6 +24,7 @@ const PanelStyled = styled.div`
          border-color: #fff;
       }
    }
+   overflow-y: auto;
 `;
 
 const LinkStyled = styled(Typography.Link)`
@@ -70,24 +70,8 @@ const LinkStyled = styled(Typography.Link)`
    }
 `;
 
-const ButtonAddRoomStyled = styled(Button)`
-   width: 100%;
-   margin: 10px 0;
-
-   @media (max-width: 768px) {
-      .ant-btn-icon {
-         display: none;
-      }
-   }
-`;
-
 export default function RoomList() {
-   const { rooms, setAddRoomVisible, setSelectedRoomId, selectedRoomId } =
-      useContext(AppContext);
-
-   const handleAddRoom = () => {
-      setAddRoomVisible(true);
-   };
+   const { rooms, setSelectedRoomId, selectedRoomId } = useContext(AppContext);
 
    return (
       <PanelStyled>
@@ -107,14 +91,6 @@ export default function RoomList() {
                </LinkStyled>
             );
          })}
-         <ButtonAddRoomStyled
-            type='primary'
-            className='add-room'
-            icon={<PlusSquareOutlined />}
-            onClick={handleAddRoom}
-         >
-            Add room
-         </ButtonAddRoomStyled>
       </PanelStyled>
    );
 }

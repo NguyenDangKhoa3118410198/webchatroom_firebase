@@ -38,13 +38,11 @@ function DebounceSelect({ fetchOptions, debounceTimeout = 300, ...props }) {
 
    return (
       <Select
-         // labelInValue
          filterOption={false}
          onSearch={debounceFetcher}
          notFoundContent={fetching ? <Spin size='small' /> : null}
          {...props}
       >
-         {/* [{label, value, photoURL}] */}
          {options.map((option) => (
             <Select.Option
                key={option.value}
@@ -106,7 +104,6 @@ export default function InviteMemberModal() {
             members: [...selectedRoom.members, ...value],
          });
          setIsInviteMemberVisible(false);
-         console.log('Room members updated successfully.');
       } catch (error) {
          console.error('Error updating room members:', error);
       }

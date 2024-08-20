@@ -32,6 +32,10 @@ const useFirestore = (collectionName, condition) => {
             queryRef = query(queryRef, orderBy('createdAt'));
          }
 
+         if (collectionName === 'rooms') {
+            queryRef = query(queryRef, orderBy('createdAt', 'desc'));
+         }
+
          collectionRef = queryRef;
       }
 

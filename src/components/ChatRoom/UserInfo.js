@@ -1,13 +1,87 @@
-import { Avatar, Button, Input, Typography } from 'antd';
+import { Avatar, Dropdown, Input, Menu, Typography } from 'antd';
 import { signOut } from 'firebase/auth';
-import React from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { auth } from '../firebase/config';
+import { auth, db } from '../firebase/config';
 
 import { AuthContext } from '../Context/AuthProvider';
+import { MoreOutlined } from '@ant-design/icons';
+import { AppContext } from '../Context/AppProvider';
+import { LogoutOutlined, PlusOutlined } from '@ant-design/icons';
+import useDebounce from '../../hooks/useDebounce';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 
 export default function UserInfo() {
-   const { displayName, photoURL } = React.useContext(AuthContext);
+   const { displayName, photoURL } = useContext(AuthContext);
+   const { setAddRoomVisible } = useContext(AppContext);
+   const [search, setSearch] = useState('');
+   const [users, setUsers] = useState([]);
+   const [loading, setLoading] = useState(false);
+   const debouncedSearchTerm = useDebounce(search, 400);
+
+   useEffect(() => {
+      const fetchUsers = async () => {
+         setLoading(true);
+         try {
+            const querySnapshot = await getDocs(
+               query(
+                  collection(db, 'users'),
+                  where('email', '>=', debouncedSearchTerm),
+                  where('email', '<=', debouncedSearchTerm + '\uf8ff')
+               )
+            );
+            console.log(querySnapshot.docs);
+
+            const userList = querySnapshot.docs.map((doc) => ({
+               id: doc.id,
+               label: doc.data().displayName,
+               value: doc.data().uid,
+               photoURL: doc.data().photoURL,
+            }));
+
+            setUsers(userList);
+         } catch (error) {
+            console.error('Error fetching users:', error);
+         } finally {
+            setLoading(false);
+         }
+      };
+
+      if (debouncedSearchTerm) {
+         fetchUsers();
+      } else {
+         setUsers([]);
+      }
+   }, [debouncedSearchTerm]);
+
+   const handleAddRoom = () => {
+      setAddRoomVisible(true);
+   };
+
+   const menuItems = [
+      {
+         key: 'create-room',
+         icon: <StyledPlusIcon />,
+         label: <StyledMenuItem> Create room </StyledMenuItem>,
+         onClick: handleAddRoom,
+      },
+      {
+         key: 'logout',
+         icon: <StyledLogoutIcon />,
+         label: <StyledMenuItem> Logout </StyledMenuItem>,
+         onClick: () => {
+            signOut(auth);
+         },
+         style: { color: 'red' },
+      },
+   ];
+
+   const handleSearch = async (e) => {
+      setSearch(e.target.value);
+   };
+
+   const menu = <Menu items={menuItems} />;
+
    return (
       <WrapperStyled>
          <UserInfoStyled>
@@ -18,15 +92,27 @@ export default function UserInfo() {
                {displayName}
             </Typography.Text>
          </UserInfoStyled>
-         <ButtonStyled
-            type='primary'
-            onClick={() => {
-               signOut(auth);
-            }}
-         >
-            Logout
-         </ButtonStyled>
-         <InputStyled type='text' placeholder='Enter something' />
+         <Dropdown overlay={menu} trigger={['click']} placement='bottom' arrow>
+            <MoreOutlined className='more-icon' />
+         </Dropdown>
+         <InputStyled
+            type='text'
+            placeholder='Enter something'
+            value={search}
+            onChange={handleSearch}
+            loading={loading}
+         />
+
+         {!loading &&
+            users.length > 0 &&
+            users.map((user) => {
+               return (
+                  <StyledUser>
+                     <Avatar size={40} src={user.photoURL} alt='Error' />
+                     {user.label}
+                  </StyledUser>
+               );
+            })}
       </WrapperStyled>
    );
 }
@@ -38,7 +124,7 @@ const WrapperStyled = styled.div`
    border-bottom: 1px solid #eee;
    align-items: center;
    gap: 1rem;
-   positon: relative;
+   position: relative;
    justify-content: space-between;
 
    .username {
@@ -60,22 +146,46 @@ const UserInfoStyled = styled.div`
    justify-content: center;
 `;
 
-const ButtonStyled = styled(Button)`
-   text-align: center;
-   max-width: 120px;
-   width: 100%;
-   gap: 1rem;
-   flex: 1;
-
-   &.ant-btn:hover {
-      border-color: #fff;
-   }
-
-   &.ant-btn {
-      padding: 0.2rem;
-   }
-`;
-
 const InputStyled = styled(Input)`
    border-radius: 50px;
+`;
+
+const StyledLogoutIcon = styled(LogoutOutlined)`
+   color: red;
+   font-size: 16px !important;
+`;
+
+const StyledPlusIcon = styled(PlusOutlined)`
+   color: blue;
+   font-size: 16px !important;
+`;
+
+const StyledMenuItem = styled.span`
+   font-size: 14px !important;
+   font-weight: 600 !important;
+`;
+
+const StyledUser = styled.div`
+   display: flex;
+   align-items: center;
+   width: 100%;
+   margin: 5px 0;
+   padding: 8px 12px;
+   height: 60px;
+   background-color: #f9f9f9;
+   border: 1px solid #e0e0e0;
+   border-radius: 12px;
+   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+   color: #333;
+   font-size: 16px;
+   font-weight: 500;
+
+   > .ant-avatar {
+      margin-right: 10px;
+   }
+
+   &:hover {
+      background-color: #f0f0f0;
+      cursor: pointer;
+   }
 `;
