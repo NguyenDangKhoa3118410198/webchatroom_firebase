@@ -11,7 +11,7 @@ export default function UserInfo() {
    return (
       <WrapperStyled>
          <UserInfoStyled>
-            <Avatar src={photoURL}>
+            <Avatar src={photoURL} size={40}>
                {photoURL ? '' : displayName?.charAt(0)?.toUpperCase()}
             </Avatar>
             <Typography.Text className='username'>
@@ -48,6 +48,8 @@ const WrapperStyled = styled.div`
       display: flex;
       justify-content: center;
       align-items: center;
+      font-weight: 600;
+      font-size: 16px;
    }
 `;
 

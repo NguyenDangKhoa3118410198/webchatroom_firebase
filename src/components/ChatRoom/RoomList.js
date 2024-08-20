@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { Button, Typography } from 'antd';
+import { Avatar, Button, Typography } from 'antd';
 import { PlusSquareOutlined } from '@ant-design/icons';
 import { AppContext } from '../Context/AppProvider';
 import styled from 'styled-components';
@@ -28,27 +28,25 @@ const PanelStyled = styled.div`
 `;
 
 const LinkStyled = styled(Typography.Link)`
-   display: inline-block;
+   display: flex;
+   align-items: center;
    margin-bottom: 5px;
    width: 100%;
    border-radius: 10px;
    padding: 10px;
-   text-align: left;
    font-size: 15px;
    font-weight: 500;
    cursor: pointer;
    background-color: transparent;
+   height: 60px;
 
    &:active,
    &.active {
-      background-color: #000;
-      color: #4d90fe !important;
+      background-color: #f0f0f0;
    }
 
    &:hover {
-      background-color: #000;
-      opacity: 0.5;
-      transition: background-color 0.5s ease-in-out;
+      background-color: #f0f0f0;
    }
 
    &.ant-typography {
@@ -57,6 +55,18 @@ const LinkStyled = styled(Typography.Link)`
       &:hover {
          color: #ccc;
       }
+   }
+
+   .avatar {
+      border-radius: 50%;
+      margin-right: 10px;
+      background-color: #ccc;
+      flex-shrink: 0;
+      font-size: 20px;
+   }
+
+   .name {
+      flex: 1;
    }
 `;
 
@@ -81,15 +91,22 @@ export default function RoomList() {
 
    return (
       <PanelStyled>
-         {rooms.map((room) => (
-            <LinkStyled
-               key={room.id}
-               onClick={() => setSelectedRoomId(room.id)}
-               className={selectedRoomId === room.id ? 'active' : ''}
-            >
-               {room.name}
-            </LinkStyled>
-         ))}
+         {rooms.map((room) => {
+            const avatarText = room.name.charAt(0).toUpperCase();
+
+            return (
+               <LinkStyled
+                  key={room.id}
+                  onClick={() => setSelectedRoomId(room.id)}
+                  className={selectedRoomId === room.id ? 'active' : ''}
+               >
+                  <Avatar className='avatar' size={40}>
+                     {avatarText}
+                  </Avatar>
+                  <span className='name'>{room.name}</span>
+               </LinkStyled>
+            );
+         })}
          <ButtonAddRoomStyled
             type='primary'
             className='add-room'

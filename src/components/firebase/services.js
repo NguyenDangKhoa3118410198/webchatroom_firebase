@@ -14,7 +14,7 @@ export const addDocument = async (data, collectionName) => {
          ...data,
          createdAt: serverTimestamp(),
       });
-      // console.log({ docRef });
+      console.log({ docRef });
    } catch (error) {
       console.error('Error adding document to Firestore:', error);
    }

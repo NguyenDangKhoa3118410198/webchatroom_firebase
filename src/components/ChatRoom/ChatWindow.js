@@ -122,6 +122,7 @@ export default function ChatWindow() {
                                  displayName={message.displayName}
                                  createAt={message.createdAt}
                                  author={message.uid === uid}
+                                 id={message.id}
                               />
                            </React.Fragment>
                         );
@@ -132,7 +133,7 @@ export default function ChatWindow() {
                   <FormStyled form={form}>
                      <Form.Item
                         name='message'
-                        style={{ flex: 1, marginBottom: 0 }}
+                        style={{ flex: 1, margin: '0 5px' }}
                      >
                         <InputStyled
                            placeholder='Enter something...'
@@ -201,7 +202,7 @@ const ButtonGroupStyled = styled.div`
 `;
 
 const ContentStyled = styled.div`
-   height: calc(96vh - 88px);
+   height: calc(96vh - 75px);
    display: flex;
    flex-direction: column;
    margin: 5px 10px;
@@ -212,11 +213,14 @@ const FormStyled = styled(Form)`
    display: flex;
    align-items: center;
    width: 100%;
+   padding: 10px 15px;
 `;
 
 const InputStyled = styled(Input)`
    flex: 1;
    margin-right: 8px;
+   border-radius: 20px;
+   height: 36px;
 `;
 
 const MessageListStyled = styled.div`
