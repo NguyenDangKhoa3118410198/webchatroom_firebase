@@ -14,7 +14,6 @@ const { Title } = Typography;
 const LoginContainer = styled.div`
    min-width: 400px;
    height: 100%;
-   padding: 2rem;
    background-color: #27262c;
 `;
 
@@ -27,25 +26,26 @@ const RowStyled = styled(Row)`
 `;
 
 const TitleStyled = styled(Title)`
-   font-weight: 900;
    text-transform: uppercase;
    text-align: center;
 
    &.ant-typography {
+      font-weight: 600;
       color: #eee;
+      font-size: 32px;
    }
 `;
 
 const ButtonStyled = styled(Button)`
-   margin: 1rem 0;
+   margin: 10px 0;
    width: 100%;
    background-color: #000;
    color: #fff;
-   padding: 2rem;
+   padding: 20px;
    display: flex;
    justify-content: center;
    align-items: center;
-   font-size: 1.4rem;
+   font-size: 16px;
 `;
 
 export default function Login() {
@@ -91,18 +91,48 @@ export default function Login() {
 
    return (
       <LoginContainer>
-         <RowStyled>
-            <Col span={14}>
-               <TitleStyled level={1}>Chat room</TitleStyled>
+         <RowStyled
+            justify='center'
+            align='middle'
+            style={{ height: '100vh', backgroundColor: '#f0f2f5' }}
+         >
+            <Col
+               span={8}
+               style={{
+                  backgroundColor: '#ffffff',
+                  padding: '40px',
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+               }}
+            >
+               <TitleStyled
+                  level={1}
+                  style={{ color: '#1890ff', textAlign: 'center' }}
+               >
+                  Chat room
+               </TitleStyled>
                <ButtonStyled
                   icon={<FacebookOutlined />}
                   onClick={handleFbLogin}
+                  style={{
+                     width: '100%',
+                     marginBottom: '15px',
+                     backgroundColor: '#3b5998',
+                     color: '#ffffff',
+                     border: 'none',
+                  }}
                >
                   Login with Facebook
                </ButtonStyled>
                <ButtonStyled
                   icon={<GoogleOutlined />}
                   onClick={handleGoogleLogin}
+                  style={{
+                     width: '100%',
+                     backgroundColor: '#ffffff',
+                     color: '#000000',
+                     border: '1px solid #dcdcdc',
+                  }}
                >
                   Login with Google
                </ButtonStyled>
