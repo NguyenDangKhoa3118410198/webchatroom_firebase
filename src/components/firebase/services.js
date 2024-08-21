@@ -10,11 +10,10 @@ import { db } from '../firebase/config';
 
 export const addDocument = async (data, collectionName) => {
    try {
-      const docRef = await addDoc(collection(db, collectionName), {
+      await addDoc(collection(db, collectionName), {
          ...data,
          createdAt: serverTimestamp(),
       });
-      console.log({ docRef });
    } catch (error) {
       console.error('Error adding document to Firestore:', error);
    }

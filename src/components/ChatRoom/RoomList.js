@@ -1,7 +1,10 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Avatar, Typography } from 'antd';
 import { AppContext } from '../Context/AppProvider';
 import styled from 'styled-components';
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import { db } from '../firebase/config';
+import { AuthContext } from '../Context/AuthProvider';
 
 const PanelStyled = styled.div`
    padding: 1rem;
@@ -71,7 +74,35 @@ const LinkStyled = styled(Typography.Link)`
 `;
 
 export default function RoomList() {
-   const { rooms, setSelectedRoomId, selectedRoomId } = useContext(AppContext);
+   const { roomPrivate, rooms, setSelectedRoomId, selectedRoomId } =
+      useContext(AppContext);
+   const { uid } = useContext(AuthContext);
+   const [userDetails, setUserDetails] = useState({});
+
+   useEffect(() => {
+      console.log(roomPrivate);
+      const fetchUserDetails = async () => {
+         const userIds = roomPrivate
+            .flatMap((room) => room.members)
+            .filter((id) => id !== uid);
+
+         if (userIds.length === 0) return;
+
+         const usersQuery = query(
+            collection(db, 'users'),
+            where('uid', 'in', userIds)
+         );
+         const querySnapshot = await getDocs(usersQuery);
+         const users = querySnapshot.docs.reduce((acc, doc) => {
+            acc[doc.data().uid] = doc.data();
+            return acc;
+         }, {});
+         console.log(users);
+         setUserDetails(users);
+      };
+
+      fetchUserDetails();
+   }, [roomPrivate, uid]);
 
    return (
       <PanelStyled>
@@ -88,6 +119,36 @@ export default function RoomList() {
                      {avatarText}
                   </Avatar>
                   <span className='name'>{room.name}</span>
+               </LinkStyled>
+            );
+         })}
+
+         {roomPrivate.map((item) => {
+            const otherParticipantId = item.members.find((id) => id !== uid);
+            const otherMember = userDetails[otherParticipantId];
+            const avatarText =
+               otherMember?.displayName?.charAt(0)?.toUpperCase() || '?';
+
+            return (
+               <LinkStyled
+                  key={item.id}
+                  onClick={() => setSelectedRoomId(item.id)}
+                  className={selectedRoomId === item.id ? 'active' : ''}
+               >
+                  {otherMember?.photoURL ? (
+                     <Avatar
+                        src={otherMember?.photoURL}
+                        className='avatar'
+                        size={40}
+                     />
+                  ) : (
+                     <Avatar className='avatar' size={40}>
+                        {avatarText}
+                     </Avatar>
+                  )}
+                  <span className='name'>
+                     {otherMember ? otherMember.displayName : 'Unknown'}
+                  </span>
                </LinkStyled>
             );
          })}

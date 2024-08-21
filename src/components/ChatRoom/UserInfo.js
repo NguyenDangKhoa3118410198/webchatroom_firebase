@@ -9,10 +9,18 @@ import { MoreOutlined } from '@ant-design/icons';
 import { AppContext } from '../Context/AppProvider';
 import { LogoutOutlined, PlusOutlined } from '@ant-design/icons';
 import useDebounce from '../../hooks/useDebounce';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import {
+   collection,
+   doc,
+   getDoc,
+   getDocs,
+   query,
+   setDoc,
+   where,
+} from 'firebase/firestore';
 
 export default function UserInfo() {
-   const { displayName, photoURL } = useContext(AuthContext);
+   const { displayName, photoURL, uid } = useContext(AuthContext);
    const { setAddRoomVisible } = useContext(AppContext);
    const [search, setSearch] = useState('');
    const [users, setUsers] = useState([]);
@@ -30,13 +38,12 @@ export default function UserInfo() {
                   where('email', '<=', debouncedSearchTerm + '\uf8ff')
                )
             );
-            console.log(querySnapshot.docs);
 
             const userList = querySnapshot.docs.map((doc) => ({
-               id: doc.id,
                label: doc.data().displayName,
                value: doc.data().uid,
                photoURL: doc.data().photoURL,
+               uid: doc.data().uid,
             }));
 
             setUsers(userList);
@@ -80,6 +87,35 @@ export default function UserInfo() {
       setSearch(e.target.value);
    };
 
+   const createRoomId = (user1Id, user2Id) => {
+      return [user1Id, user2Id].sort().join('_');
+   };
+
+   const handleChatPrivate = async (uidSelected) => {
+      const roomId = createRoomId(uidSelected, uid);
+      const roomRef = doc(db, 'privateChats', roomId);
+
+      try {
+         const roomSnapshot = await getDoc(roomRef);
+
+         if (roomSnapshot.exists()) {
+            console.log('Phòng chat đã tồn tại.');
+         } else {
+            console.log('Phòng chat chưa tồn tại, tạo mới.');
+            await setDoc(roomRef, {
+               members: [uidSelected, uid],
+               createdAt: new Date(),
+            });
+            console.log('Phòng chat mới đã được tạo.');
+         }
+      } catch (error) {
+         console.error(
+            'Error checking room existence or creating room: ',
+            error
+         );
+      }
+   };
+
    const menu = <Menu items={menuItems} />;
 
    return (
@@ -100,14 +136,17 @@ export default function UserInfo() {
             placeholder='Enter something'
             value={search}
             onChange={handleSearch}
-            loading={loading}
+            loading={loading.toString()}
          />
 
          {!loading &&
             users.length > 0 &&
             users.map((user) => {
                return (
-                  <StyledUser>
+                  <StyledUser
+                     key={user.uid}
+                     onClick={() => handleChatPrivate(user.uid)}
+                  >
                      <Avatar size={40} src={user.photoURL} alt='Error' />
                      {user.label}
                   </StyledUser>

@@ -28,9 +28,24 @@ export default function AppProvider({ children }) {
 
    const rooms = useFirestore('rooms', roomsConditon);
 
+   const roomPrivateConditon = React.useMemo(() => {
+      return {
+         fieldName: 'members',
+         operator: 'array-contains',
+         compareValue: uid,
+      };
+   }, [uid]);
+
+   const roomPrivate = useFirestore('privateChats', roomPrivateConditon);
+
    const selectedRoom = React.useMemo(
       () => rooms.find((room) => room.id === selectedRoomId) || {},
       [rooms, selectedRoomId]
+   );
+
+   const selectedRoomPrivate = React.useMemo(
+      () => roomPrivate.find((item) => item.id === selectedRoomId) || {},
+      [roomPrivate, selectedRoomId]
    );
 
    const usersConditon = React.useMemo(() => {
@@ -47,7 +62,9 @@ export default function AppProvider({ children }) {
       <AppContext.Provider
          value={{
             rooms,
+            roomPrivate,
             selectedRoom,
+            selectedRoomPrivate,
             members,
             isAddRoomVisible,
             setAddRoomVisible,

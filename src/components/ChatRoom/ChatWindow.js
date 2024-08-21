@@ -1,5 +1,5 @@
 import { UserAddOutlined } from '@ant-design/icons';
-import { Avatar, Button, Tooltip, Form, Input, Alert } from 'antd';
+import { Avatar, Button, Tooltip, Form, Input } from 'antd';
 import React, { useContext, useState, useMemo, useRef } from 'react';
 import styled from 'styled-components';
 import Message from './Message';
@@ -9,8 +9,12 @@ import { AuthContext } from '../Context/AuthProvider';
 import useFirestore from '../../hooks/useFirestore';
 
 export default function ChatWindow() {
-   const { selectedRoom, members, setIsInviteMemberVisible } =
-      useContext(AppContext);
+   const {
+      selectedRoom,
+      selectedRoomPrivate,
+      members,
+      setIsInviteMemberVisible,
+   } = useContext(AppContext);
    const { uid, photoURL, displayName } = useContext(AuthContext);
    const [inputValue, setInputValue] = useState('');
    const [form] = Form.useForm();
@@ -22,37 +26,44 @@ export default function ChatWindow() {
       }
    };
 
-   const conditionMessage = useMemo(
-      () => ({
-         fieldName: 'roomId',
-         operator: '==',
-         compareValue: selectedRoom.id,
-      }),
-      [selectedRoom.id]
-   );
+   const conditionMessage = useMemo(() => {
+      if (selectedRoom.id) {
+         return {
+            fieldName: 'roomId',
+            operator: '==',
+            compareValue: selectedRoom.id,
+         };
+      }
+      if (selectedRoomPrivate.id) {
+         return {
+            fieldName: 'roomId',
+            operator: '==',
+            compareValue: selectedRoomPrivate.id,
+         };
+      }
+      return null;
+   }, [selectedRoom.id, selectedRoomPrivate.id]);
 
    const messages = useFirestore('messages', conditionMessage);
-
-   if (!selectedRoom) {
-      return null;
-   }
 
    const handleInputChange = (e) => {
       setInputValue(e.target.value);
    };
 
    const handleOnSubmit = () => {
-      addDocument(
-         {
-            text: inputValue,
-            uid,
-            photoURL,
-            roomId: selectedRoom.id,
-            displayName,
-         },
-         'messages'
-      );
-      form.resetFields(['message']);
+      if (selectedRoom.id || selectedRoomPrivate.id) {
+         addDocument(
+            {
+               text: inputValue,
+               uid,
+               photoURL,
+               roomId: selectedRoom.id || selectedRoomPrivate.id,
+               displayName,
+            },
+            'messages'
+         );
+         form.resetFields(['message']);
+      }
    };
 
    function formatDate(seconds) {
@@ -66,39 +77,48 @@ export default function ChatWindow() {
 
    return (
       <WrapperStyled>
-         {selectedRoom.id ? (
+         {(selectedRoom.id || selectedRoomPrivate.id) && (
             <>
                <HeaderStyled>
                   <div className='header__info'>
-                     <p className='header__title'>{selectedRoom.name}</p>
+                     <p className='header__title'>
+                        {selectedRoom.id
+                           ? selectedRoom.name
+                           : selectedRoomPrivate.name}
+                     </p>
                      <span className='header__description'>
-                        {selectedRoom.description}
+                        {selectedRoom.id ? selectedRoom.description : ''}
                      </span>
                   </div>
-                  <ButtonGroupStyled>
-                     <WrapperButtonInvite>
-                        <Button
-                           type='text'
-                           icon={<UserAddOutlined />}
-                           onClick={() => setIsInviteMemberVisible(true)}
-                        >
-                           Add member
-                        </Button>
-                     </WrapperButtonInvite>
-                     <Avatar.Group size='sm' maxCount={2}>
-                        {members.map((member) => (
-                           <Tooltip title={member.displayName} key={member.uid}>
-                              <Avatar src={member.photoURL}>
-                                 {member.photoURL
-                                    ? ''
-                                    : member.displayName
-                                         ?.charAt(0)
-                                         ?.toUpperCase()}
-                              </Avatar>
-                           </Tooltip>
-                        ))}
-                     </Avatar.Group>
-                  </ButtonGroupStyled>
+                  {selectedRoom.id && (
+                     <ButtonGroupStyled>
+                        <WrapperButtonInvite>
+                           <Button
+                              type='text'
+                              icon={<UserAddOutlined />}
+                              onClick={() => setIsInviteMemberVisible(true)}
+                           >
+                              Add member
+                           </Button>
+                        </WrapperButtonInvite>
+                        <Avatar.Group size='sm' maxCount={2}>
+                           {members.map((member) => (
+                              <Tooltip
+                                 title={member.displayName}
+                                 key={member.uid}
+                              >
+                                 <Avatar src={member.photoURL}>
+                                    {member.photoURL
+                                       ? ''
+                                       : member.displayName
+                                            ?.charAt(0)
+                                            ?.toUpperCase()}
+                                 </Avatar>
+                              </Tooltip>
+                           ))}
+                        </Avatar.Group>
+                     </ButtonGroupStyled>
+                  )}
                </HeaderStyled>
                <ContentStyled>
                   <MessageListStyled>
@@ -148,14 +168,6 @@ export default function ChatWindow() {
                   </FormStyled>
                </ContentStyled>
             </>
-         ) : (
-            <Alert
-               message='Please choose a room.'
-               type='info'
-               showIcon
-               closable
-               style={{ margin: '10px' }}
-            />
          )}
       </WrapperStyled>
    );
