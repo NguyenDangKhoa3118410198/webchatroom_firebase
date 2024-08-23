@@ -80,7 +80,6 @@ export default function RoomList() {
    const [userDetails, setUserDetails] = useState({});
 
    useEffect(() => {
-      console.log(roomPrivate);
       const fetchUserDetails = async () => {
          const userIds = roomPrivate
             .flatMap((room) => room.members)
@@ -97,7 +96,6 @@ export default function RoomList() {
             acc[doc.data().uid] = doc.data();
             return acc;
          }, {});
-         console.log(users);
          setUserDetails(users);
       };
 

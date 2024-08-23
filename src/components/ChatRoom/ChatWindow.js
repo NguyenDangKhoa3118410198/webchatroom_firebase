@@ -1,5 +1,5 @@
-import { UserAddOutlined } from '@ant-design/icons';
-import { Avatar, Button, Tooltip, Form, Input } from 'antd';
+import { UploadOutlined, UserAddOutlined } from '@ant-design/icons';
+import { Avatar, Button, Tooltip, Form, Input, message } from 'antd';
 import React, { useContext, useState, useMemo, useRef } from 'react';
 import styled from 'styled-components';
 import Message from './Message';
@@ -7,6 +7,7 @@ import { AppContext } from '../Context/AppProvider';
 import { addDocument } from '../firebase/services';
 import { AuthContext } from '../Context/AuthProvider';
 import useFirestore from '../../hooks/useFirestore';
+import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 
 export default function ChatWindow() {
    const {
@@ -19,11 +20,16 @@ export default function ChatWindow() {
    const [inputValue, setInputValue] = useState('');
    const [form] = Form.useForm();
    const messagesEndRef = useRef(null);
+   const [selectedFiles, setSelectedFiles] = useState([]); // Cập nhật để hỗ trợ nhiều file
+   const fileInputRef = useRef(null);
+   let lastDate = '';
 
    const scrollToBottom = () => {
-      if (messagesEndRef.current) {
-         messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-      }
+      setTimeout(() => {
+         if (messagesEndRef.current) {
+            messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+         }
+      }, 400);
    };
 
    const conditionMessage = useMemo(() => {
@@ -50,19 +56,39 @@ export default function ChatWindow() {
       setInputValue(e.target.value);
    };
 
-   const handleOnSubmit = () => {
-      if (selectedRoom.id || selectedRoomPrivate.id) {
-         addDocument(
-            {
-               text: inputValue,
-               uid,
-               photoURL,
-               roomId: selectedRoom.id || selectedRoomPrivate.id,
-               displayName,
-            },
-            'messages'
-         );
+   const handleOnSubmit = async () => {
+      if (!inputValue.trim() && selectedFiles.length === 0) {
+         return;
+      }
+
+      try {
+         let fileURLs = [];
+         if (selectedFiles.length > 0) {
+            fileURLs = await uploadFiles(selectedFiles);
+         }
+
+         const messageData = {
+            text: inputValue.trim(),
+            uid,
+            photoURL,
+            roomId: selectedRoom.id || selectedRoomPrivate.id,
+            displayName,
+            fileURLs,
+         };
+
+         await addDocument(messageData, 'messages');
+
+         setSelectedFiles([]);
+         setInputValue('');
          form.resetFields(['message']);
+
+         if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+         }
+         scrollToBottom();
+      } catch (error) {
+         console.error('Error sending message:', error);
+         message.error('Error sending message');
       }
    };
 
@@ -73,7 +99,36 @@ export default function ChatWindow() {
       return date.toISOString().split('T')[0];
    }
 
-   let lastDate = '';
+   const uploadFiles = async (files) => {
+      const storage = getStorage();
+
+      const uploadPromises = files.map(async (file) => {
+         try {
+            const fileType = file.type;
+            const storageRef = ref(storage, `${fileType}s/${file.name}`);
+
+            const snapshot = await uploadBytes(storageRef, file);
+
+            const downloadURL = await getDownloadURL(snapshot.ref);
+            return { downloadURL, fileType, fileName: file.name };
+         } catch (error) {
+            console.error(`Error uploading file ${file.name}: `, error);
+            return null;
+         }
+      });
+
+      try {
+         const downloadURLs = await Promise.all(uploadPromises);
+         return downloadURLs.filter((url) => url !== null);
+      } catch (error) {
+         console.error('Error uploading files: ', error);
+         throw error;
+      }
+   };
+
+   const handleUpload = () => {
+      fileInputRef.current.click();
+   };
 
    return (
       <WrapperStyled>
@@ -143,25 +198,49 @@ export default function ChatWindow() {
                                  createAt={message.createdAt}
                                  author={message.uid === uid}
                                  id={message.id}
+                                 fileURLs={message.fileURLs || []}
                               />
                            </React.Fragment>
                         );
                      })}
                      <div ref={messagesEndRef} />
-                     {scrollToBottom()}
                   </MessageListStyled>
                   <FormStyled form={form}>
+                     <input
+                        ref={fileInputRef}
+                        type='file'
+                        multiple
+                        onChange={(e) =>
+                           setSelectedFiles(Array.from(e.target.files))
+                        }
+                        style={{ display: 'none' }}
+                     />
+                     <SubFeature onClick={handleUpload}>
+                        <UploadOutlined />
+                     </SubFeature>
+
                      <Form.Item
                         name='message'
                         style={{ flex: 1, margin: '0 5px' }}
                      >
+                        {selectedFiles.length > 0 && (
+                           <Form.Item style={{ margin: '0 5px' }}>
+                              <div>
+                                 {selectedFiles.map((file, index) => (
+                                    <div key={index}>{file.name}</div>
+                                 ))}
+                              </div>
+                           </Form.Item>
+                        )}
                         <InputStyled
                            placeholder='Enter something...'
                            autoComplete='off'
+                           value={inputValue}
                            onChange={handleInputChange}
                            onPressEnter={handleOnSubmit}
                         />
                      </Form.Item>
+
                      <Button type='primary' onClick={handleOnSubmit}>
                         Send
                      </Button>
@@ -217,7 +296,7 @@ const ContentStyled = styled.div`
    height: calc(96vh - 75px);
    display: flex;
    flex-direction: column;
-   margin: 5px 10px;
+   margin: 5px 5px 5px 10px;
    justify-content: flex-end;
 `;
 
@@ -233,6 +312,7 @@ const InputStyled = styled(Input)`
    margin-right: 8px;
    border-radius: 20px;
    height: 36px;
+   background-color: #f0f0f0;
 `;
 
 const MessageListStyled = styled.div`
@@ -266,5 +346,19 @@ const DividerStyled = styled.div`
 
    &::after {
       right: 0;
+   }
+`;
+
+const SubFeature = styled.div`
+   margin: 5px;
+   padding: 5px;
+   display: inline-flex;
+   align-items: center;
+   justify-content: center;
+   cursor: pointer;
+
+   &:hover {
+      background-color: #f0f0f0;
+      border-radius: 50%;
    }
 `;
