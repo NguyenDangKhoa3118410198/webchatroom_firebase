@@ -56,7 +56,16 @@ export default function AppProvider({ children }) {
       };
    }, [selectedRoom.members]);
 
+   const userPrivateConditon = React.useMemo(() => {
+      return {
+         fieldName: 'uid',
+         operator: 'in',
+         compareValue: selectedRoomPrivate.members,
+      };
+   }, [selectedRoomPrivate]);
+
    const members = useFirestore('users', usersConditon);
+   const memberPrivate = useFirestore('users', userPrivateConditon);
 
    return (
       <AppContext.Provider
@@ -66,6 +75,7 @@ export default function AppProvider({ children }) {
             selectedRoom,
             selectedRoomPrivate,
             members,
+            memberPrivate,
             isAddRoomVisible,
             setAddRoomVisible,
             selectedRoomId,

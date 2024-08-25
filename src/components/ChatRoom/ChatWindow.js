@@ -14,6 +14,7 @@ export default function ChatWindow() {
       selectedRoom,
       selectedRoomPrivate,
       members,
+      memberPrivate,
       setIsInviteMemberVisible,
    } = useContext(AppContext);
    const { uid, photoURL, displayName } = useContext(AuthContext);
@@ -136,14 +137,26 @@ export default function ChatWindow() {
             <>
                <HeaderStyled>
                   <div className='header__info'>
-                     <p className='header__title'>
-                        {selectedRoom.id
-                           ? selectedRoom.name
-                           : selectedRoomPrivate.name}
-                     </p>
-                     <span className='header__description'>
-                        {selectedRoom.id ? selectedRoom.description : ''}
-                     </span>
+                     {selectedRoomPrivate.id && (
+                        <div className='header__wrapper'>
+                           <Avatar
+                              src={memberPrivate[1]?.photoURL}
+                              alt='error'
+                              size={34}
+                           />
+                           <span className='header__title'>
+                              {memberPrivate[1]?.displayName}
+                           </span>
+                        </div>
+                     )}
+                     {selectedRoom.id && (
+                        <>
+                           <p className='header__title'> {selectedRoom.name}</p>
+                           <span className='header__description'>
+                              {selectedRoom?.description}
+                           </span>
+                        </>
+                     )}
                   </div>
                   {selectedRoom.id && (
                      <ButtonGroupStyled>
@@ -276,13 +289,20 @@ const HeaderStyled = styled.div`
          font-size: 16px;
       }
 
+      &__wrapper {
+         display: flex;
+         align-items: center;
+      }
+
       &__title {
          margin: 0;
-         font-weight: bold;
+         font-weight: 600;
+         margin-inline: 5px;
       }
 
       &__description {
          font-size: 12px;
+         margin-inline: 5px;
       }
    }
 `;
