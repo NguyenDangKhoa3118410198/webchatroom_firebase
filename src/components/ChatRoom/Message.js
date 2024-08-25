@@ -1,4 +1,4 @@
-import { Avatar, Dropdown, Image, Menu, Tooltip, Typography } from 'antd';
+import { Avatar, Dropdown, Image, Menu, Typography } from 'antd';
 import React from 'react';
 import styled from 'styled-components';
 import { db } from '../firebase/config';
@@ -83,13 +83,13 @@ export default function Message({
          case 'wav':
             return (
                <FileOutlined style={{ fontSize: '24px', color: '#f57c00' }} />
-            ); // Sử dụng icon chung cho âm thanh
+            );
          case 'mp4':
          case 'webm':
          case 'ogg':
             return (
                <FileOutlined style={{ fontSize: '24px', color: '#0288d1' }} />
-            ); // Sử dụng icon chung cho video
+            );
          case 'zip':
          case 'rar':
             return (
@@ -119,17 +119,7 @@ export default function Message({
    return (
       <WrapperStyled $author={author} key={id}>
          {text.trim() ? (
-            <Tooltip
-               color='#fff'
-               placement='left'
-               title={
-                  <div className='message-date'>
-                     <Typography.Text className='date'>
-                        {formatTime(createAt?.seconds)}
-                     </Typography.Text>
-                  </div>
-               }
-            >
+            <div className='message-layout-container'>
                <div className='message-container'>
                   <div className='wrapper-message'>
                      <div className='format-message'>
@@ -152,32 +142,47 @@ export default function Message({
                         <div className='message'>
                            <Typography.Text>{text}</Typography.Text>
                         </div>
+                        <div className='message-date'>
+                           <Typography.Text className='date'>
+                              {formatTime(createAt?.seconds)}
+                           </Typography.Text>
+                        </div>
                      </div>
                   </div>
-                  <div className='more-options'>
-                     <Dropdown
-                        overlay={menu}
-                        trigger={['click']}
-                        placement='top'
-                        arrow
-                     >
-                        <MoreOutlined className='more-icon' color='red' />
-                     </Dropdown>
-                  </div>
                </div>
-            </Tooltip>
+               <div className='more-options'>
+                  <Dropdown
+                     overlay={menu}
+                     trigger={['click']}
+                     placement='top'
+                     arrow
+                  >
+                     <MoreOutlined className='more-icon' />
+                  </Dropdown>
+               </div>
+            </div>
          ) : null}
          {fileURLs &&
             fileURLs.map((file) => {
                const { downloadURL, fileType, fileName } = file;
                if (fileType.startsWith('image/')) {
                   return (
-                     <div style={{ margin: '5px' }}>
+                     <div className='message-layout-container'>
                         <ImageStyled
                            src={downloadURL}
                            alt='chat-img'
                            key={fileName}
                         />
+                        <div className='more-options'>
+                           <Dropdown
+                              overlay={menu}
+                              trigger={['click']}
+                              placement='top'
+                              arrow
+                           >
+                              <MoreOutlined className='more-icon' color='red' />
+                           </Dropdown>
+                        </div>
                      </div>
                   );
                } else if (fileType.startsWith('video/')) {
@@ -196,19 +201,45 @@ export default function Message({
                   fileType.startsWith('text/')
                ) {
                   return (
-                     <FileLink
-                        key={fileName}
-                        href={downloadURL}
-                        download={fileName}
-                        target='_blank'
-                        rel='noopener noreferrer'
-                     >
-                        {getIconFile(fileType)}
-                        <span className='file-name'>{fileName}</span>
-                     </FileLink>
+                     <div className='message-layout-container'>
+                        <FileLink
+                           key={fileName}
+                           href={downloadURL}
+                           download={fileName}
+                           target='_blank'
+                           rel='noopener noreferrer'
+                        >
+                           {getIconFile(fileType)}
+                           <span className='file-name'>{fileName}</span>
+                        </FileLink>
+                        <div className='more-options'>
+                           <Dropdown
+                              overlay={menu}
+                              trigger={['click']}
+                              placement='top'
+                              arrow
+                           >
+                              <MoreOutlined className='more-icon' color='red' />
+                           </Dropdown>
+                        </div>
+                     </div>
                   );
                } else {
-                  return <p key={id}>Unsupported file type: {fileType}</p>;
+                  return (
+                     <div style={{ position: 'relative' }}>
+                        <p key={id}>Unsupported file type: {fileType}</p>
+                        <div className='more-options'>
+                           <Dropdown
+                              overlay={menu}
+                              trigger={['click']}
+                              placement='top'
+                              arrow
+                           >
+                              <MoreOutlined className='more-icon' color='red' />
+                           </Dropdown>
+                        </div>
+                     </div>
+                  );
                }
             })}
       </WrapperStyled>
@@ -223,6 +254,15 @@ const WrapperStyled = styled.div`
    font-size: 16px;
    position: relative;
 
+   .message-layout-container {
+      display: flex;
+      flex-direction: ${(props) => (props.$author ? 'row-reverse' : 'row')};
+      max-width: 70%;
+      position: relative;
+      justify-content: center;
+      align-items: center;
+   }
+
    .ant-typography {
       font-size: 15px;
       color: ${(props) => (props.$author ? 'white' : 'black')};
@@ -235,7 +275,7 @@ const WrapperStyled = styled.div`
 
    .date {
       font-size: 11px;
-      color: #a7a7a7;
+      color: #b0b0b0;
    }
 
    .message-container {
@@ -245,8 +285,6 @@ const WrapperStyled = styled.div`
       background-color: ${(props) => (props.$author ? '#4D90FE' : '#f0f0f0')};
       border-radius: ${(props) => (props.$author ? '8px 16px' : '16px 8px')};
       padding: 6px 8px;
-      margin: ${(props) =>
-         props.$author ? '0 0.4rem 0 8rem' : '0 8rem 0 0.4rem'};
    }
 
    .wrapper-message {
@@ -307,19 +345,13 @@ const WrapperStyled = styled.div`
    }
 
    .more-icon {
-      position: absolute;
-      top: 12px;
-      ${(props) => (props.$author ? 'left: 8px;' : 'right: 8px;')}
       cursor: pointer;
       color: #3c3c3c;
+      opacity: 0;
    }
 
-   .more-options {
-      position: absolute;
-      ${(props) => (props.$author ? 'left: -40%;' : 'right: -40%;')}
-      top: 0;
-      transform: translateY(-50%);
-      z-index: 1;
+   &:hover .more-icon {
+      opacity: 1;
    }
 `;
 

@@ -20,7 +20,7 @@ export default function ChatWindow() {
    const [inputValue, setInputValue] = useState('');
    const [form] = Form.useForm();
    const messagesEndRef = useRef(null);
-   const [selectedFiles, setSelectedFiles] = useState([]); // Cập nhật để hỗ trợ nhiều file
+   const [selectedFiles, setSelectedFiles] = useState([]);
    const fileInputRef = useRef(null);
    let lastDate = '';
 
@@ -302,7 +302,7 @@ const ContentStyled = styled.div`
 
 const FormStyled = styled(Form)`
    display: flex;
-   align-items: center;
+   align-items: flex-end;
    width: 100%;
    padding: 10px 15px;
 `;
