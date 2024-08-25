@@ -1,4 +1,8 @@
-import { UploadOutlined, UserAddOutlined } from '@ant-design/icons';
+import {
+   ArrowLeftOutlined,
+   PaperClipOutlined,
+   UserAddOutlined,
+} from '@ant-design/icons';
 import { Avatar, Button, Tooltip, Form, Input, message } from 'antd';
 import React, { useContext, useState, useMemo, useRef } from 'react';
 import styled from 'styled-components';
@@ -16,6 +20,8 @@ export default function ChatWindow() {
       members,
       memberPrivate,
       setIsInviteMemberVisible,
+      activeItem,
+      setActiveItem,
    } = useContext(AppContext);
    const { uid, photoURL, displayName } = useContext(AuthContext);
    const [inputValue, setInputValue] = useState('');
@@ -132,10 +138,16 @@ export default function ChatWindow() {
    };
 
    return (
-      <WrapperStyled>
+      <WrapperStyled activeitem={activeItem ? 1 : 0}>
          {(selectedRoom.id || selectedRoomPrivate.id) && (
             <>
                <HeaderStyled>
+                  <div
+                     className='back-mobile'
+                     onClick={() => setActiveItem(false)}
+                  >
+                     <ArrowLeftOutlined />
+                  </div>
                   <div className='header__info'>
                      {selectedRoomPrivate.id && (
                         <div className='header__wrapper'>
@@ -202,7 +214,9 @@ export default function ChatWindow() {
                         return (
                            <React.Fragment key={message.id}>
                               {showDivider && (
-                                 <DividerStyled>{messageDate}</DividerStyled>
+                                 <DividerStyled key={`divider-${message.id}`}>
+                                    {messageDate}
+                                 </DividerStyled>
                               )}
                               <Message
                                  text={message.text}
@@ -229,7 +243,9 @@ export default function ChatWindow() {
                         style={{ display: 'none' }}
                      />
                      <SubFeature onClick={handleUpload}>
-                        <UploadOutlined />
+                        <PaperClipOutlined
+                           style={{ fontSize: '20px', color: '#08c' }}
+                        />
                      </SubFeature>
 
                      <Form.Item
@@ -272,6 +288,10 @@ const WrapperStyled = styled.div`
    background-color: #fff;
    height: calc(100vh - 40px);
    flex: 2;
+
+   @media (max-width: 425px) {
+      display: ${({ activeitem }) => (activeitem ? 'block' : 'none')};
+   }
 `;
 
 const HeaderStyled = styled.div`
@@ -280,6 +300,10 @@ const HeaderStyled = styled.div`
    height: 58px;
    padding: 0 16px;
    align-items: center;
+
+   .back-mobile {
+      display: none;
+   }
 
    .header {
       &__info {
@@ -303,6 +327,12 @@ const HeaderStyled = styled.div`
       &__description {
          font-size: 12px;
          margin-inline: 5px;
+      }
+   }
+
+   @media (max-width: 425px) {
+      .back-mobile {
+         display: block;
       }
    }
 `;

@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import UserInfo from './UserInfo';
 import RoomList from './RoomList';
 import styled from 'styled-components';
+import { AppContext } from '../Context/AppProvider';
 
 const SidebarStyled = styled.div`
    flex: 1;
@@ -19,11 +20,16 @@ const SidebarStyled = styled.div`
       > .ant-collapse-header {
       color: #000;
    }
+
+   @media (max-width: 425px) {
+      display: ${({ activeitem }) => (activeitem ? 'none' : 'block')};
+   }
 `;
 
 export default function Sidebar() {
+   const { activeItem } = useContext(AppContext);
    return (
-      <SidebarStyled>
+      <SidebarStyled activeitem={activeItem ? 1 : 0}>
          <UserInfo />
          <RoomList />
       </SidebarStyled>

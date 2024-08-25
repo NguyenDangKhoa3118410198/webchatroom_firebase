@@ -74,8 +74,13 @@ const LinkStyled = styled(Typography.Link)`
 `;
 
 export default function RoomList() {
-   const { roomPrivate, rooms, setSelectedRoomId, selectedRoomId } =
-      useContext(AppContext);
+   const {
+      roomPrivate,
+      rooms,
+      setSelectedRoomId,
+      selectedRoomId,
+      setActiveItem,
+   } = useContext(AppContext);
    const { uid } = useContext(AuthContext);
    const [userDetails, setUserDetails] = useState({});
 
@@ -110,7 +115,10 @@ export default function RoomList() {
             return (
                <LinkStyled
                   key={room.id}
-                  onClick={() => setSelectedRoomId(room.id)}
+                  onClick={() => {
+                     setSelectedRoomId(room.id);
+                     setActiveItem(true);
+                  }}
                   className={selectedRoomId === room.id ? 'active' : ''}
                >
                   <Avatar className='avatar' size={40}>
@@ -130,7 +138,10 @@ export default function RoomList() {
             return (
                <LinkStyled
                   key={item.id}
-                  onClick={() => setSelectedRoomId(item.id)}
+                  onClick={() => {
+                     setSelectedRoomId(item.id);
+                     setActiveItem(true);
+                  }}
                   className={selectedRoomId === item.id ? 'active' : ''}
                >
                   {otherMember?.photoURL ? (

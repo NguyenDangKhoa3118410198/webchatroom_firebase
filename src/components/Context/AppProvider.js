@@ -1,15 +1,15 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { AuthContext } from './AuthProvider';
 import useFirestore from '../../hooks/useFirestore';
 
 export const AppContext = React.createContext();
 
 export default function AppProvider({ children }) {
-   const [isAddRoomVisible, setAddRoomVisible] = React.useState(false);
-   const [isInviteMemberVisible, setIsInviteMemberVisible] =
-      React.useState(false);
+   const [isAddRoomVisible, setAddRoomVisible] = useState(false);
+   const [isInviteMemberVisible, setIsInviteMemberVisible] = useState(false);
 
-   const [selectedRoomId, setSelectedRoomId] = React.useState('');
+   const [selectedRoomId, setSelectedRoomId] = useState('');
+   const [activeItem, setActiveItem] = useState(false);
 
    // { rooms
    //    name: 'room name'
@@ -82,6 +82,8 @@ export default function AppProvider({ children }) {
             setSelectedRoomId,
             isInviteMemberVisible,
             setIsInviteMemberVisible,
+            activeItem,
+            setActiveItem,
          }}
       >
          {children}

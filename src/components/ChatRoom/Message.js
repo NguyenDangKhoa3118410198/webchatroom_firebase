@@ -261,6 +261,7 @@ const WrapperStyled = styled.div`
       position: relative;
       justify-content: center;
       align-items: center;
+      margin-right: 5px;
    }
 
    .ant-typography {
