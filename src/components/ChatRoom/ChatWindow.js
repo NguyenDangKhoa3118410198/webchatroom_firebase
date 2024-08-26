@@ -4,7 +4,7 @@ import {
    UserAddOutlined,
 } from '@ant-design/icons';
 import { Avatar, Button, Tooltip, Form, Input, message } from 'antd';
-import React, { useContext, useState, useMemo, useRef } from 'react';
+import React, { useContext, useState, useMemo, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import Message from './Message';
 import { AppContext } from '../Context/AppProvider';
@@ -34,12 +34,16 @@ export default function ChatWindow() {
    const fileInputRef = useRef(null);
    let lastDate = '';
 
+   useEffect(() => {
+      scrollToBottom();
+   }, [selectedRoom, selectedRoomPrivate]);
+
    const scrollToBottom = () => {
       setTimeout(() => {
          if (messagesEndRef.current) {
             messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
          }
-      }, 400);
+      }, 300);
    };
 
    const conditionMessage = useMemo(() => {

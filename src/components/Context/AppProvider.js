@@ -26,7 +26,7 @@ export default function AppProvider({ children }) {
       };
    }, [uid]);
 
-   const rooms = useFirestore('rooms', roomsConditon);
+   const rooms = useFirestore('rooms', roomsConditon, 'desc');
 
    const roomPrivateConditon = React.useMemo(() => {
       return {
@@ -36,7 +36,11 @@ export default function AppProvider({ children }) {
       };
    }, [uid]);
 
-   const roomPrivate = useFirestore('privateChats', roomPrivateConditon);
+   const roomPrivate = useFirestore(
+      'privateChats',
+      roomPrivateConditon,
+      'desc'
+   );
 
    const selectedRoom = React.useMemo(
       () => rooms.find((room) => room.id === selectedRoomId) || {},

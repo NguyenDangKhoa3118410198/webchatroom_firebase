@@ -5,14 +5,25 @@ import {
    where,
    query,
    orderBy,
+   limit as firestoreLimit,
 } from 'firebase/firestore';
 import { db } from '../components/firebase/config';
 
-const useFirestore = (collectionName, condition) => {
+const useFirestore = (
+   collectionName,
+   condition,
+   orderDirection = 'asc',
+   limit = null
+) => {
    const [documents, setDocuments] = useState([]);
 
    React.useEffect(() => {
       let collectionRef = collection(db, collectionName);
+      const orderByFields = {
+         messages: 'createdAt',
+         rooms: 'latestMessageTime',
+         privateChats: 'latestMessageTime',
+      };
 
       if (condition) {
          if (!condition.compareValue || !condition.compareValue.length) {
@@ -28,16 +39,15 @@ const useFirestore = (collectionName, condition) => {
             )
          );
 
-         if (collectionName === 'messages') {
-            queryRef = query(queryRef, orderBy('createdAt'));
-         }
+         if (orderByFields[collectionName]) {
+            queryRef = query(
+               queryRef,
+               orderBy(orderByFields[collectionName], orderDirection)
+            );
 
-         if (collectionName === 'rooms') {
-            queryRef = query(queryRef, orderBy('latestMessageTime', 'desc'));
-         }
-
-         if (collectionName === 'privateChats') {
-            queryRef = query(queryRef, orderBy('latestMessageTime', 'desc'));
+            if (Number.isInteger(limit) && limit > 0) {
+               queryRef = query(queryRef, firestoreLimit(limit));
+            }
          }
 
          collectionRef = queryRef;
@@ -51,8 +61,8 @@ const useFirestore = (collectionName, condition) => {
          setDocuments(documents);
       });
 
-      return unsubscribe;
-   }, [collectionName, condition]);
+      return () => unsubscribe();
+   }, [collectionName, condition, orderDirection, limit]);
 
    return documents;
 };
