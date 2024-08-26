@@ -105,6 +105,7 @@ export default function UserInfo() {
             await setDoc(roomRef, {
                members: [uidSelected, uid],
                createdAt: new Date(),
+               latestMessageTime: new Date(),
             });
             console.log('Phòng chat mới đã được tạo.');
          }

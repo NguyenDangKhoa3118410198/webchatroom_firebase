@@ -33,7 +33,11 @@ const useFirestore = (collectionName, condition) => {
          }
 
          if (collectionName === 'rooms') {
-            queryRef = query(queryRef, orderBy('createdAt', 'desc'));
+            queryRef = query(queryRef, orderBy('latestMessageTime', 'desc'));
+         }
+
+         if (collectionName === 'privateChats') {
+            queryRef = query(queryRef, orderBy('latestMessageTime', 'desc'));
          }
 
          collectionRef = queryRef;

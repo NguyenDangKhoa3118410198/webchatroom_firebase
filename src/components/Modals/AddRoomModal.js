@@ -15,7 +15,10 @@ export default function AddRoomModal() {
          const values = await form.validateFields();
          values.name =
             values.name.charAt(0).toUpperCase() + values.name.slice(1);
-         await addDocument({ ...values, members: [uid] }, 'rooms');
+         await addDocument(
+            { ...values, members: [uid], latestMessageTime: new Date() },
+            'rooms'
+         );
          form.resetFields();
          setAddRoomVisible(false);
       } catch (error) {

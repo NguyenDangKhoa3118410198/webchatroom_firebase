@@ -12,6 +12,8 @@ import { addDocument } from '../firebase/services';
 import { AuthContext } from '../Context/AuthProvider';
 import useFirestore from '../../hooks/useFirestore';
 import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from '../firebase/config';
 
 export default function ChatWindow() {
    const {
@@ -69,6 +71,7 @@ export default function ChatWindow() {
       }
 
       try {
+         const currentTime = new Date();
          let fileURLs = [];
          if (selectedFiles.length > 0) {
             fileURLs = await uploadFiles(selectedFiles);
@@ -81,9 +84,21 @@ export default function ChatWindow() {
             roomId: selectedRoom.id || selectedRoomPrivate.id,
             displayName,
             fileURLs,
+            createdAt: currentTime,
          };
 
          await addDocument(messageData, 'messages');
+
+         const roomId = selectedRoom.id || selectedRoomPrivate.id;
+         if (roomId.includes('_')) {
+            await updateDoc(doc(db, 'privateChats', roomId), {
+               latestMessageTime: currentTime,
+            });
+         } else {
+            await updateDoc(doc(db, 'rooms', roomId), {
+               latestMessageTime: currentTime,
+            });
+         }
 
          setSelectedFiles([]);
          setInputValue('');
