@@ -18,7 +18,7 @@ const SidebarStyled = styled.div`
    :where(.css-dev-only-do-not-override-17sses9).ant-collapse
       > .ant-collapse-item
       > .ant-collapse-header {
-      color: #000;
+      color: var(--color-black);
    }
 
    @media (max-width: 425px) {

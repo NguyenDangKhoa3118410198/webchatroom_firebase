@@ -14,6 +14,7 @@ import useFirestore from '../../hooks/useFirestore';
 import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
+import { ReactComponent as WaittingChat } from '../../imgs/waitting-chat.svg';
 
 export default function ChatWindow() {
    const {
@@ -154,7 +155,7 @@ export default function ChatWindow() {
 
    return (
       <WrapperStyled activeitem={activeItem ? 1 : 0}>
-         {(selectedRoom.id || selectedRoomPrivate.id) && (
+         {selectedRoom.id || selectedRoomPrivate.id ? (
             <>
                <HeaderStyled>
                   <div
@@ -291,6 +292,13 @@ export default function ChatWindow() {
                   </FormStyled>
                </ContentStyled>
             </>
+         ) : (
+            <WaittingChatWrapper>
+               <LabelWaittingChat>
+                  Choose a room to start chatting
+               </LabelWaittingChat>
+               <WaittingChat />
+            </WaittingChatWrapper>
          )}
       </WrapperStyled>
    );
@@ -426,4 +434,17 @@ const SubFeature = styled.div`
       background-color: #f0f0f0;
       border-radius: 50%;
    }
+`;
+
+const WaittingChatWrapper = styled.div`
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   justify-content: center;
+   height: 100%;
+`;
+
+const LabelWaittingChat = styled.h3`
+   margin: 5px;
+   font-weight: 700;
 `;

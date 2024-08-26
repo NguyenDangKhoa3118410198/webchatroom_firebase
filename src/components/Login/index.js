@@ -39,7 +39,7 @@ const TitleStyled = styled(Title)`
 const ButtonStyled = styled(Button)`
    margin: 10px 0;
    width: 100%;
-   background-color: #000;
+   background-color: var(--color-black);
    color: #fff;
    padding: 20px;
    display: flex;

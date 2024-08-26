@@ -53,10 +53,10 @@ const LinkStyled = styled(Typography.Link)`
    }
 
    &.ant-typography {
-      color: #000;
+      color: var(--color-black);
 
       &:hover {
-         color: #ccc;
+         color: var(--color-black);
       }
    }
 

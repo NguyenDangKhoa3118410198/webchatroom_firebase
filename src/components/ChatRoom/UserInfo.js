@@ -71,6 +71,7 @@ export default function UserInfo() {
          icon: <StyledPlusIcon />,
          label: <StyledMenuItem> Create room </StyledMenuItem>,
          onClick: handleAddRoom,
+         style: { color: '#00b9f5' },
       },
       {
          key: 'logout',
@@ -79,7 +80,7 @@ export default function UserInfo() {
          onClick: () => {
             signOut(auth);
          },
-         style: { color: 'red' },
+         style: { color: '#ff1b1b' },
       },
    ];
 
@@ -168,7 +169,7 @@ const WrapperStyled = styled.div`
    justify-content: space-between;
 
    .username {
-      color: #000;
+      color: var(--color-black);
       margin-left: 5px;
       text-align: center;
       display: flex;
@@ -191,12 +192,12 @@ const InputStyled = styled(Input)`
 `;
 
 const StyledLogoutIcon = styled(LogoutOutlined)`
-   color: red;
+   color: #ff1b1b;
    font-size: 16px !important;
 `;
 
 const StyledPlusIcon = styled(PlusOutlined)`
-   color: blue;
+   color: #00b9f5;
    font-size: 16px !important;
 `;
 
