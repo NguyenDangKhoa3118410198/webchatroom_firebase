@@ -293,7 +293,7 @@ const WrapperStyled = styled.div`
    }
 
    .wrapper-message {
-      min-width: 40px;
+      min-width: 20px;
       display: flex;
       flex-direction: ${(props) => (props.$author ? 'row-reverse' : 'row')};
       background-color: ${(props) => (props.$author ? '#4D90FE' : '#f0f0f0')};
