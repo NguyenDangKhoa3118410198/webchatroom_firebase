@@ -1,4 +1,4 @@
-import { Avatar, Dropdown, Image, Menu, Typography } from 'antd';
+import { Avatar, Dropdown, Image, Menu, Tooltip, Typography } from 'antd';
 import React from 'react';
 import styled from 'styled-components';
 import { db } from '../firebase/config';
@@ -120,32 +120,26 @@ export default function Message({
       <WrapperStyled $author={author} key={id}>
          {text.trim() ? (
             <div className='message-layout-container'>
+               <div className='wrapper-info'>
+                  <div className='author-info'>
+                     <Tooltip placement='left' title={displayName}>
+                        <Avatar
+                           size='default'
+                           src={photoURL}
+                           className='avatar-custom'
+                        >
+                           {photoURL
+                              ? ''
+                              : displayName.charAt(0)?.toUpperCase()}
+                        </Avatar>
+                     </Tooltip>
+                  </div>
+               </div>
                <div className='message-container'>
                   <div className='wrapper-message'>
                      <div className='format-message'>
-                        <div className='wrapper-info'>
-                           <div className='author-info'>
-                              <Avatar
-                                 size='default'
-                                 src={photoURL}
-                                 className='avatar-custom'
-                              >
-                                 {photoURL
-                                    ? ''
-                                    : displayName.charAt(0)?.toUpperCase()}
-                              </Avatar>
-                              <Typography.Text className='author'>
-                                 {displayName}
-                              </Typography.Text>
-                           </div>
-                        </div>
                         <div className='message'>
                            <Typography.Text>{text}</Typography.Text>
-                        </div>
-                        <div className='message-date'>
-                           <Typography.Text className='date'>
-                              {formatTime(createAt?.seconds)}
-                           </Typography.Text>
                         </div>
                      </div>
                   </div>
@@ -159,6 +153,11 @@ export default function Message({
                   >
                      <MoreOutlined className='more-icon' />
                   </Dropdown>
+               </div>
+               <div className='message-date'>
+                  <Typography.Text className='date'>
+                     {formatTime(createAt?.seconds)}
+                  </Typography.Text>
                </div>
             </div>
          ) : null}
@@ -182,6 +181,11 @@ export default function Message({
                            >
                               <MoreOutlined className='more-icon' color='red' />
                            </Dropdown>
+                        </div>
+                        <div className='message-date'>
+                           <Typography.Text className='date'>
+                              {formatTime(createAt?.seconds)}
+                           </Typography.Text>
                         </div>
                      </div>
                   );
@@ -257,7 +261,7 @@ const WrapperStyled = styled.div`
    .message-layout-container {
       display: flex;
       flex-direction: ${(props) => (props.$author ? 'row-reverse' : 'row')};
-      max-width: 70%;
+      max-width: 80%;
       position: relative;
       justify-content: center;
       align-items: center;
@@ -284,16 +288,16 @@ const WrapperStyled = styled.div`
       display: flex;
       flex-direction: ${(props) => (props.$author ? 'row-reverse' : 'row')};
       background-color: ${(props) => (props.$author ? '#4D90FE' : '#f0f0f0')};
-      border-radius: ${(props) => (props.$author ? '8px 16px' : '16px 8px')};
+      border-radius: ${(props) => (props.$author ? '22px' : '22px')};
       padding: 6px 8px;
    }
 
    .wrapper-message {
-      min-width: 150px;
+      min-width: 40px;
       display: flex;
       flex-direction: ${(props) => (props.$author ? 'row-reverse' : 'row')};
       background-color: ${(props) => (props.$author ? '#4D90FE' : '#f0f0f0')};
-      border-radius: ${(props) => (props.$author ? '8px 16px' : '16px 8px')};
+      border-radius: ${(props) => (props.$author ? '22px' : '22px')};
       padding: 0 8px;
       font-weight: 400;
       overflow: hidden;
@@ -309,8 +313,9 @@ const WrapperStyled = styled.div`
       display: flex;
       flex-wrap: wrap;
       flex-direction: ${(props) => (props.$author ? 'row-reverse' : 'row')};
-      margin-bottom: 4px;
       gap: 5px;
+      margin: 0 4px;
+      margin-top: auto;
    }
 
    .avatar-custom {
@@ -332,6 +337,7 @@ const WrapperStyled = styled.div`
       display: flex;
       align-items: center;
       text-align: center;
+      white-space: nowrap;
    }
 
    .message {
