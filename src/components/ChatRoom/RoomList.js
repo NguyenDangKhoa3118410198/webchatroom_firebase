@@ -1,10 +1,17 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Avatar, Typography } from 'antd';
+import { Avatar, Dropdown, Menu, Typography } from 'antd';
 import { AppContext } from '../Context/AppProvider';
 import styled from 'styled-components';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import {
+   collection,
+   deleteDoc,
+   getDocs,
+   query,
+   where,
+} from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { AuthContext } from '../Context/AuthProvider';
+import { MoreOutlined } from '@ant-design/icons';
 
 const PanelStyled = styled.div`
    padding: 1rem;
@@ -71,6 +78,23 @@ const LinkStyled = styled(Typography.Link)`
    .name {
       flex: 1;
    }
+
+   .more-options {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 40px;
+      height: 40px;
+      background-color: #fff;
+      border-radius: 50%;
+      opacity: 0.4;
+   }
+
+   &:hover {
+      .more-options {
+         opacity: 1;
+      }
+   }
 `;
 
 export default function RoomList() {
@@ -107,11 +131,37 @@ export default function RoomList() {
       fetchUserDetails();
    }, [roomPrivate, uid]);
 
+   const handleDeleteAllMessageByRoomId = async (roomId) => {
+      const messagesRef = collection(db, 'messages');
+      const q = query(messagesRef, where('roomId', '==', roomId));
+
+      try {
+         const querySnapshot = await getDocs(q);
+
+         const deletePromises = querySnapshot.docs.map((doc) =>
+            deleteDoc(doc.ref)
+         );
+
+         await Promise.all(deletePromises);
+      } catch (error) {
+         console.error('Error deleting messages by roomId:', error);
+      }
+   };
+
    return (
       <PanelStyled>
          {rooms.map((room) => {
             const avatarText = room.name.charAt(0).toUpperCase();
-
+            const menu = (
+               <Menu>
+                  <Menu.Item
+                     key='delete'
+                     onClick={() => handleDeleteAllMessageByRoomId(room.id)}
+                  >
+                     Delete
+                  </Menu.Item>
+               </Menu>
+            );
             return (
                <LinkStyled
                   key={room.id}
@@ -125,6 +175,16 @@ export default function RoomList() {
                      {avatarText}
                   </Avatar>
                   <span className='name'>{room.name}</span>
+                  <div className='more-options'>
+                     <Dropdown
+                        overlay={menu}
+                        trigger={['click']}
+                        placement='top'
+                        arrow
+                     >
+                        <MoreOutlined className='more-icon' />
+                     </Dropdown>
+                  </div>
                </LinkStyled>
             );
          })}
@@ -135,30 +195,53 @@ export default function RoomList() {
             const avatarText =
                otherMember?.displayName?.charAt(0)?.toUpperCase() || '?';
 
+            const menu = (
+               <Menu>
+                  <Menu.Item
+                     key='delete'
+                     onClick={() => handleDeleteAllMessageByRoomId(item.id)}
+                  >
+                     Delete
+                  </Menu.Item>
+               </Menu>
+            );
+
             return (
-               <LinkStyled
-                  key={item.id}
-                  onClick={() => {
-                     setSelectedRoomId(item.id);
-                     setActiveItem(true);
-                  }}
-                  className={selectedRoomId === item.id ? 'active' : ''}
-               >
-                  {otherMember?.photoURL ? (
-                     <Avatar
-                        src={otherMember?.photoURL}
-                        className='avatar'
-                        size={40}
-                     />
-                  ) : (
-                     <Avatar className='avatar' size={40}>
-                        {avatarText}
-                     </Avatar>
-                  )}
-                  <span className='name'>
-                     {otherMember ? otherMember.displayName : 'Unknown'}
-                  </span>
-               </LinkStyled>
+               <div style={{ display: 'flex' }}>
+                  <LinkStyled
+                     key={item.id}
+                     onClick={() => {
+                        setSelectedRoomId(item.id);
+                        setActiveItem(true);
+                     }}
+                     className={selectedRoomId === item.id ? 'active' : ''}
+                  >
+                     {otherMember?.photoURL ? (
+                        <Avatar
+                           src={otherMember?.photoURL}
+                           className='avatar'
+                           size={40}
+                        />
+                     ) : (
+                        <Avatar className='avatar' size={40}>
+                           {avatarText}
+                        </Avatar>
+                     )}
+                     <span className='name'>
+                        {otherMember ? otherMember.displayName : 'Unknown'}
+                     </span>
+                     <div className='more-options'>
+                        <Dropdown
+                           overlay={menu}
+                           trigger={['click']}
+                           placement='top'
+                           arrow
+                        >
+                           <MoreOutlined className='more-icon' />
+                        </Dropdown>
+                     </div>
+                  </LinkStyled>
+               </div>
             );
          })}
       </PanelStyled>
