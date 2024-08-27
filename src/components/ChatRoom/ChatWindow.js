@@ -1,6 +1,7 @@
 import {
    ArrowLeftOutlined,
    PaperClipOutlined,
+   SmileOutlined,
    UserAddOutlined,
 } from '@ant-design/icons';
 import { Avatar, Button, Tooltip, Form, Input, message } from 'antd';
@@ -15,6 +16,7 @@ import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { ReactComponent as WaittingChat } from '../../imgs/waitting-chat.svg';
+import EmojiPicker from 'emoji-picker-react';
 
 export default function ChatWindow() {
    const {
@@ -28,10 +30,12 @@ export default function ChatWindow() {
    } = useContext(AppContext);
    const { uid, photoURL, displayName } = useContext(AuthContext);
    const [inputValue, setInputValue] = useState('');
+   const [openEmoji, setOpenEmoji] = useState(false);
    const [form] = Form.useForm();
-   const messagesEndRef = useRef(null);
    const [selectedFiles, setSelectedFiles] = useState([]);
+   const messagesEndRef = useRef(null);
    const fileInputRef = useRef(null);
+   const pickerRef = useRef(null);
    let lastDate = '';
 
    useEffect(() => {
@@ -43,8 +47,15 @@ export default function ChatWindow() {
          if (messagesEndRef.current) {
             messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
          }
-      }, 300);
+      }, 500);
    };
+
+   useEffect(() => {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+         document.removeEventListener('mousedown', handleClickOutside);
+      };
+   }, []);
 
    const conditionMessage = useMemo(() => {
       if (selectedRoom.id) {
@@ -68,6 +79,7 @@ export default function ChatWindow() {
 
    const handleInputChange = (e) => {
       setInputValue(e.target.value);
+      setOpenEmoji(false);
    };
 
    const handleOnSubmit = async () => {
@@ -155,6 +167,16 @@ export default function ChatWindow() {
 
    const handleUpload = () => {
       fileInputRef.current.click();
+   };
+
+   const handleEmojiSelect = (emoji) => {
+      setInputValue((prev) => prev + emoji?.emoji);
+   };
+
+   const handleClickOutside = (event) => {
+      if (pickerRef.current && !pickerRef.current.contains(event.target)) {
+         setOpenEmoji(false);
+      }
    };
 
    return (
@@ -263,9 +285,7 @@ export default function ChatWindow() {
                         style={{ display: 'none' }}
                      />
                      <SubFeature onClick={handleUpload}>
-                        <PaperClipOutlined
-                           style={{ fontSize: '20px', color: '#08c' }}
-                        />
+                        <PaperClipOutlined />
                      </SubFeature>
 
                      <Form.Item
@@ -288,9 +308,40 @@ export default function ChatWindow() {
                            onChange={handleInputChange}
                            onPressEnter={handleOnSubmit}
                         />
+                        <Input
+                           value={inputValue}
+                           disabled
+                           readOnly
+                           style={{ display: 'none' }}
+                        />
                      </Form.Item>
 
-                     <Button type='primary' onClick={handleOnSubmit}>
+                     <SubFeature
+                        onClick={() => setOpenEmoji((preValue) => !preValue)}
+                     >
+                        <SmileOutlined />
+                     </SubFeature>
+                     <PopupEmoji>
+                        <div
+                           style={{
+                              position: 'absolute',
+                              bottom: '50px',
+                              right: 0,
+                           }}
+                           ref={pickerRef}
+                        >
+                           <EmojiPicker
+                              open={openEmoji}
+                              onEmojiClick={handleEmojiSelect}
+                           />
+                        </div>
+                     </PopupEmoji>
+
+                     <Button
+                        type='primary'
+                        onClick={handleOnSubmit}
+                        style={{ marginBottom: '4px' }}
+                     >
                         Send
                      </Button>
                   </FormStyled>
@@ -389,7 +440,8 @@ const InputStyled = styled(Input)`
    margin-right: 8px;
    border-radius: 20px;
    height: 36px;
-   background-color: #f0f0f0;
+   background-color: #f3f3f5;
+   font-size: 16px;
 `;
 
 const MessageListStyled = styled.div`
@@ -433,6 +485,8 @@ const SubFeature = styled.div`
    align-items: center;
    justify-content: center;
    cursor: pointer;
+   font-size: 20px;
+   color: #08c;
 
    &:hover {
       background-color: #f0f0f0;
@@ -451,4 +505,8 @@ const WaittingChatWrapper = styled.div`
 const LabelWaittingChat = styled.h3`
    margin: 5px;
    font-weight: 700;
+`;
+
+const PopupEmoji = styled.div`
+   position: relative;
 `;
