@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import { auth, db } from '../firebase/config';
 
 import { AuthContext } from '../Context/AuthProvider';
-import { MoreOutlined } from '@ant-design/icons';
+import { MoreOutlined, UserOutlined } from '@ant-design/icons';
 import { AppContext } from '../Context/AppProvider';
 import { LogoutOutlined, PlusOutlined } from '@ant-design/icons';
 import useDebounce from '../../hooks/useDebounce';
@@ -16,12 +16,13 @@ import {
    getDocs,
    query,
    setDoc,
+   updateDoc,
    where,
 } from 'firebase/firestore';
 
 export default function UserInfo() {
    const { displayName, photoURL, uid } = useContext(AuthContext);
-   const { setAddRoomVisible } = useContext(AppContext);
+   const { setAddRoomVisible, setSelectedRoomId } = useContext(AppContext);
    const [search, setSearch] = useState('');
    const [users, setUsers] = useState([]);
    const [loading, setLoading] = useState(false);
@@ -35,12 +36,13 @@ export default function UserInfo() {
                query(
                   collection(db, 'users'),
                   where('email', '>=', debouncedSearchTerm),
-                  where('email', '<=', debouncedSearchTerm + '\uf8ff')
+                  where('email', '<=', debouncedSearchTerm + '\uf8ff'),
+                  where('uid', '!=', uid)
                )
             );
 
             const userList = querySnapshot.docs.map((doc) => ({
-               label: doc.data().displayName,
+               label: doc.data().displayName ?? 'Anonymous',
                value: doc.data().uid,
                photoURL: doc.data().photoURL,
                uid: doc.data().uid,
@@ -59,7 +61,7 @@ export default function UserInfo() {
       } else {
          setUsers([]);
       }
-   }, [debouncedSearchTerm]);
+   }, [debouncedSearchTerm, uid]);
 
    const handleAddRoom = () => {
       setAddRoomVisible(true);
@@ -89,20 +91,35 @@ export default function UserInfo() {
    };
 
    const createRoomId = (user1Id, user2Id) => {
+      if (user1Id === user2Id) return false;
       return [user1Id, user2Id].sort().join('_');
    };
 
    const handleChatPrivate = async (uidSelected) => {
       const roomId = createRoomId(uidSelected, uid);
+      if (!roomId) {
+         return;
+      }
       const roomRef = doc(db, 'privateChats', roomId);
 
       try {
          const roomSnapshot = await getDoc(roomRef);
 
          if (roomSnapshot.exists()) {
+            const currentTime = new Date();
+            if (roomId.includes('_')) {
+               await updateDoc(doc(db, 'privateChats', roomId), {
+                  latestMessageTime: currentTime,
+               });
+               setSelectedRoomId(roomId);
+            } else {
+               // await updateDoc(doc(db, 'rooms', roomId), {
+               //    latestMessageTime: currentTime,
+               // });
+               console.log('public');
+            }
             console.log('Phòng chat đã tồn tại.');
          } else {
-            console.log('Phòng chat chưa tồn tại, tạo mới.');
             await setDoc(roomRef, {
                members: [uidSelected, uid],
                createdAt: new Date(),
@@ -115,6 +132,8 @@ export default function UserInfo() {
             'Error checking room existence or creating room: ',
             error
          );
+      } finally {
+         setSearch('');
       }
    };
 
@@ -123,11 +142,16 @@ export default function UserInfo() {
    return (
       <WrapperStyled>
          <UserInfoStyled>
-            <Avatar src={photoURL} size={40}>
-               {photoURL ? '' : displayName?.charAt(0)?.toUpperCase()}
-            </Avatar>
+            {displayName ? (
+               <Avatar src={photoURL} size={40}>
+                  {photoURL ? '' : displayName?.charAt(0)?.toUpperCase()}
+               </Avatar>
+            ) : (
+               <Avatar icon={<UserOutlined />} size={40} alt='Error' />
+            )}
+
             <Typography.Text className='username'>
-               {displayName}
+               {displayName ?? 'Anonymous'}
             </Typography.Text>
          </UserInfoStyled>
          <Dropdown overlay={menu} trigger={['click']} placement='bottom' arrow>

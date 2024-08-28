@@ -12,6 +12,7 @@ import {
    FileOutlined,
    FileZipOutlined,
    MoreOutlined,
+   UserOutlined,
 } from '@ant-design/icons';
 
 export default function Message({
@@ -122,16 +123,23 @@ export default function Message({
             <div className='message-layout-container'>
                <div className='wrapper-info'>
                   <div className='author-info'>
-                     <Tooltip placement='left' title={displayName}>
-                        <Avatar
-                           size='default'
-                           src={photoURL}
-                           className='avatar-custom'
-                        >
-                           {photoURL
-                              ? ''
-                              : displayName.charAt(0)?.toUpperCase()}
-                        </Avatar>
+                     <Tooltip
+                        placement='left'
+                        title={displayName ?? 'Anonymous'}
+                     >
+                        {displayName ? (
+                           <Avatar
+                              size='default'
+                              src={photoURL}
+                              className='avatar-custom'
+                           >
+                              {photoURL
+                                 ? ''
+                                 : displayName?.charAt(0)?.toUpperCase()}
+                           </Avatar>
+                        ) : (
+                           <Avatar icon={<UserOutlined />} alt='Error' />
+                        )}
                      </Tooltip>
                   </div>
                </div>

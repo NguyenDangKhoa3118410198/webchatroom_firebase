@@ -3,6 +3,7 @@ import {
    PaperClipOutlined,
    SmileOutlined,
    UserAddOutlined,
+   UserOutlined,
 } from '@ant-design/icons';
 import { Avatar, Button, Tooltip, Form, Input, message } from 'antd';
 import React, { useContext, useState, useMemo, useRef, useEffect } from 'react';
@@ -117,8 +118,8 @@ export default function ChatWindow() {
             });
          }
 
-         setSelectedFiles([]);
          setInputValue('');
+         setSelectedFiles([]);
          form.resetFields(['message']);
 
          if (fileInputRef.current) {
@@ -193,13 +194,22 @@ export default function ChatWindow() {
                   <div className='header__info'>
                      {selectedRoomPrivate.id && (
                         <div className='header__wrapper'>
-                           <Avatar
-                              src={memberPrivate[1]?.photoURL}
-                              alt='error'
-                              size={34}
-                           />
+                           {memberPrivate[1]?.displayName ? (
+                              <Avatar
+                                 src={memberPrivate[1]?.photoURL}
+                                 alt='error'
+                                 size={34}
+                              />
+                           ) : (
+                              <Avatar
+                                 icon={<UserOutlined />}
+                                 size={34}
+                                 alt='Error'
+                              />
+                           )}
+
                            <span className='header__title'>
-                              {memberPrivate[1]?.displayName}
+                              {memberPrivate[1]?.displayName ?? 'Anonymous'}
                            </span>
                         </div>
                      )}
@@ -229,7 +239,7 @@ export default function ChatWindow() {
                                  title={member.displayName}
                                  key={member.uid}
                               >
-                                 <Avatar src={member.photoURL}>
+                                 <Avatar src={member.photoURL} key={member.uid}>
                                     {member.photoURL
                                        ? ''
                                        : member.displayName
@@ -292,28 +302,32 @@ export default function ChatWindow() {
                         name='message'
                         style={{ flex: 1, margin: '0 5px' }}
                      >
-                        {selectedFiles.length > 0 && (
-                           <Form.Item style={{ margin: '0 5px' }}>
-                              <div>
-                                 {selectedFiles.map((file, index) => (
-                                    <div key={index}>{file.name}</div>
-                                 ))}
-                              </div>
-                           </Form.Item>
-                        )}
-                        <InputStyled
-                           placeholder='Enter something...'
-                           autoComplete='off'
-                           value={inputValue}
-                           onChange={handleInputChange}
-                           onPressEnter={handleOnSubmit}
-                        />
-                        <Input
-                           value={inputValue}
-                           disabled
-                           readOnly
-                           style={{ display: 'none' }}
-                        />
+                        <div>
+                           {selectedFiles.length > 0 && (
+                              <Form.Item style={{ margin: '0 5px' }}>
+                                 <div>
+                                    {selectedFiles.map((file, index) => (
+                                       <div key={index + file.name}>
+                                          {file.name}
+                                       </div>
+                                    ))}
+                                 </div>
+                              </Form.Item>
+                           )}
+                           <InputStyled
+                              placeholder='Enter something...'
+                              autoComplete='off'
+                              value={inputValue}
+                              onChange={handleInputChange}
+                              onPressEnter={handleOnSubmit}
+                           />
+                           <Input
+                              value={inputValue}
+                              disabled
+                              readOnly
+                              style={{ display: 'none' }}
+                           />
+                        </div>
                      </Form.Item>
 
                      <SubFeature

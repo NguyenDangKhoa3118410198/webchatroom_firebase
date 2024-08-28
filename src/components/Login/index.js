@@ -1,8 +1,12 @@
 import React from 'react';
 import { Row, Col, Button, Typography } from 'antd';
-import { signInWithPopup } from 'firebase/auth';
+import { signInAnonymously, signInWithPopup } from 'firebase/auth';
 import { auth, fbProvider, googleProvider } from '../firebase/config';
-import { FacebookOutlined, GoogleOutlined } from '@ant-design/icons';
+import {
+   FacebookOutlined,
+   GoogleOutlined,
+   UserOutlined,
+} from '@ant-design/icons';
 import {
    checkExistsEmmailAndAddDocument,
    generateKeywords,
@@ -15,6 +19,11 @@ const LoginContainer = styled.div`
    min-width: 400px;
    height: 100%;
    background-color: #27262c;
+
+   @media (max-width: 768px) {
+      padding: 20px;
+      min-width: 100%;
+   }
 `;
 
 const RowStyled = styled(Row)`
@@ -22,30 +31,68 @@ const RowStyled = styled(Row)`
    justify-content: center;
    align-items: center;
    width: 100%;
-   height: 500px;
+   height: 100vh;
+`;
+
+const ColStyled = styled(Col)`
+   background-color: #ffffff;
+   padding: 40px;
+   border-radius: 8px;
+   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+
+   @media (max-width: 768px) {
+      padding: 20px;
+      min-width: 90%;
+   }
 `;
 
 const TitleStyled = styled(Title)`
    text-transform: uppercase;
    text-align: center;
-
-   &.ant-typography {
-      font-weight: 600;
-      color: #eee;
-      font-size: 32px;
-   }
+   font-weight: 600;
+   color: #1890ff;
+   font-size: 32px;
 `;
 
 const ButtonStyled = styled(Button)`
    margin: 10px 0;
    width: 100%;
-   background-color: var(--color-black);
-   color: #fff;
-   padding: 20px;
+   padding: 28px 20px;
    display: flex;
    justify-content: center;
    align-items: center;
    font-size: 16px;
+   font-weight: 600;
+
+   &.facebook-button {
+      background-color: #3b5998;
+      color: #ffffff;
+      border: none;
+
+      .anticon {
+         color: #ffffff; /* Đặt màu cho biểu tượng Facebook */
+      }
+   }
+
+   &.google-button {
+      background-color: #ffffff;
+      color: #000000;
+      border: 1px solid #dcdcdc;
+
+      .anticon {
+         color: #4285f4; /* Màu cho biểu tượng Google */
+      }
+   }
+
+   &.anonymous-button {
+      background-color: #ffffff;
+      color: #000000;
+      border: 1px solid #dcdcdc;
+
+      .anticon {
+         color: #000000; /* Màu cho biểu tượng Anonymous */
+      }
+   }
 `;
 
 export default function Login() {
@@ -85,58 +132,46 @@ export default function Login() {
             'users'
          );
       } catch (error) {
-         console.error('Error during Facebook login:', error);
+         console.error('Error during Google login:', error);
+      }
+   };
+
+   const handleAnonymousLogin = async () => {
+      try {
+         const { user } = await signInAnonymously(auth);
+         console.log('Anonymous user:', user);
+      } catch (error) {
+         console.error('Error during anonymous login:', error);
       }
    };
 
    return (
       <LoginContainer>
-         <RowStyled
-            justify='center'
-            align='middle'
-            style={{ height: '100vh', backgroundColor: '#f0f2f5' }}
-         >
-            <Col
-               span={8}
-               style={{
-                  backgroundColor: '#ffffff',
-                  padding: '40px',
-                  borderRadius: '8px',
-                  boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-               }}
-            >
-               <TitleStyled
-                  level={1}
-                  style={{ color: '#1890ff', textAlign: 'center' }}
-               >
-                  Chat room
-               </TitleStyled>
+         <RowStyled>
+            <ColStyled span={8}>
+               <TitleStyled level={1}>Chat room</TitleStyled>
                <ButtonStyled
+                  className='facebook-button'
                   icon={<FacebookOutlined />}
                   onClick={handleFbLogin}
-                  style={{
-                     width: '100%',
-                     marginBottom: '15px',
-                     backgroundColor: '#3b5998',
-                     color: '#ffffff',
-                     border: 'none',
-                  }}
                >
-                  Login with Facebook
+                  Facebook
                </ButtonStyled>
                <ButtonStyled
+                  className='google-button'
                   icon={<GoogleOutlined />}
                   onClick={handleGoogleLogin}
-                  style={{
-                     width: '100%',
-                     backgroundColor: '#ffffff',
-                     color: '#000000',
-                     border: '1px solid #dcdcdc',
-                  }}
                >
-                  Login with Google
+                  Google
                </ButtonStyled>
-            </Col>
+               <ButtonStyled
+                  className='anonymous-button'
+                  icon={<UserOutlined />}
+                  onClick={handleAnonymousLogin}
+               >
+                  Anonymous
+               </ButtonStyled>
+            </ColStyled>
          </RowStyled>
       </LoginContainer>
    );

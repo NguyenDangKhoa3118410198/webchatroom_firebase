@@ -12,6 +12,7 @@ import {
 import { db } from '../firebase/config';
 import { AuthContext } from '../Context/AuthProvider';
 import { MoreOutlined } from '@ant-design/icons';
+import { Modal } from 'antd';
 
 const PanelStyled = styled.div`
    padding: 1rem;
@@ -107,6 +108,22 @@ export default function RoomList() {
    } = useContext(AppContext);
    const { uid } = useContext(AuthContext);
    const [userDetails, setUserDetails] = useState({});
+   const { confirm } = Modal;
+
+   const showConfirm = () => {
+      return new Promise((resolve) => {
+         confirm({
+            title: 'Are you sure?',
+            content: 'Delete all messages',
+            onOk() {
+               resolve(true);
+            },
+            onCancel() {
+               resolve(false);
+            },
+         });
+      });
+   };
 
    useEffect(() => {
       const fetchUserDetails = async () => {
@@ -132,6 +149,8 @@ export default function RoomList() {
    }, [roomPrivate, uid]);
 
    const handleDeleteAllMessageByRoomId = async (roomId) => {
+      const confirm = await showConfirm();
+      if (!confirm) return;
       const messagesRef = collection(db, 'messages');
       const q = query(messagesRef, where('roomId', '==', roomId));
 
@@ -153,14 +172,15 @@ export default function RoomList() {
          {rooms.map((room) => {
             const avatarText = room.name.charAt(0).toUpperCase();
             const menu = (
-               <Menu>
-                  <Menu.Item
-                     key='delete'
-                     onClick={() => handleDeleteAllMessageByRoomId(room.id)}
-                  >
-                     Delete
-                  </Menu.Item>
-               </Menu>
+               <Menu
+                  items={[
+                     {
+                        key: 'delete',
+                        label: 'Delete all',
+                        onClick: () => handleDeleteAllMessageByRoomId(room.id),
+                     },
+                  ]}
+               />
             );
             return (
                <LinkStyled
@@ -196,14 +216,15 @@ export default function RoomList() {
                otherMember?.displayName?.charAt(0)?.toUpperCase() || '?';
 
             const menu = (
-               <Menu>
-                  <Menu.Item
-                     key='delete'
-                     onClick={() => handleDeleteAllMessageByRoomId(item.id)}
-                  >
-                     Delete
-                  </Menu.Item>
-               </Menu>
+               <Menu
+                  items={[
+                     {
+                        key: 'delete',
+                        label: 'Delete all',
+                        onClick: () => handleDeleteAllMessageByRoomId(item.id),
+                     },
+                  ]}
+               />
             );
 
             return (
@@ -228,7 +249,7 @@ export default function RoomList() {
                         </Avatar>
                      )}
                      <span className='name'>
-                        {otherMember ? otherMember.displayName : 'Unknown'}
+                        {otherMember?.displayName ?? 'Anonymous'}
                      </span>
                      <div className='more-options'>
                         <Dropdown
