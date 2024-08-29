@@ -39,6 +39,7 @@ export default function ChatWindow() {
    const fileInputRef = useRef(null);
    const pickerRef = useRef(null);
    let lastDate = '';
+   const otherMember = memberPrivate.find((o) => o.uid !== uid);
 
    useEffect(() => {
       scrollToBottom();
@@ -195,9 +196,9 @@ export default function ChatWindow() {
                   <div className='header__info'>
                      {selectedRoomPrivate.id && (
                         <div className='header__wrapper'>
-                           {memberPrivate[1]?.displayName ? (
+                           {otherMember?.displayName ? (
                               <Avatar
-                                 src={memberPrivate[1]?.photoURL}
+                                 src={otherMember?.photoURL}
                                  alt='error'
                                  size={34}
                               />
@@ -210,7 +211,7 @@ export default function ChatWindow() {
                            )}
 
                            <span className='header__title'>
-                              {memberPrivate[1]?.displayName ?? 'Anonymous'}
+                              {otherMember?.displayName ?? 'Anonymous'}
                            </span>
                         </div>
                      )}
