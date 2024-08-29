@@ -1,12 +1,9 @@
 import {
-   ArrowLeftOutlined,
    PaperClipOutlined,
    SendOutlined,
    SmileOutlined,
-   UserAddOutlined,
-   UserOutlined,
 } from '@ant-design/icons';
-import { Avatar, Button, Tooltip, Form, Input, message } from 'antd';
+import { Button, Form, Input, message } from 'antd';
 import React, { useContext, useState, useMemo, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import Message from './Message';
@@ -18,7 +15,8 @@ import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { ReactComponent as WaittingChat } from '../../imgs/waitting-chat.svg';
-import EmojiPicker from 'emoji-picker-react';
+import { HeaderChatWindow } from './HeaderChatWindow';
+const EmojiPicker = React.lazy(() => import('emoji-picker-react'));
 
 export default function ChatWindow() {
    const {
@@ -38,8 +36,9 @@ export default function ChatWindow() {
    const messagesEndRef = useRef(null);
    const fileInputRef = useRef(null);
    const pickerRef = useRef(null);
-   let lastDate = '';
+   const iconEmoji = useRef(null);
    const otherMember = memberPrivate.find((o) => o.uid !== uid);
+   let lastDate = '';
 
    useEffect(() => {
       scrollToBottom();
@@ -50,7 +49,7 @@ export default function ChatWindow() {
          if (messagesEndRef.current) {
             messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
          }
-      }, 500);
+      }, 400);
    };
 
    useEffect(() => {
@@ -150,8 +149,8 @@ export default function ChatWindow() {
             const storageRef = ref(storage, `${fileType}s/${file.name}`);
 
             const snapshot = await uploadBytes(storageRef, file);
-
             const downloadURL = await getDownloadURL(snapshot.ref);
+
             return { downloadURL, fileType, fileName: file.name };
          } catch (error) {
             console.error(`Error uploading file ${file.name}: `, error);
@@ -160,8 +159,16 @@ export default function ChatWindow() {
       });
 
       try {
-         const downloadURLs = await Promise.all(uploadPromises);
-         return downloadURLs.filter((url) => url !== null);
+         const results = await Promise.allSettled(uploadPromises);
+
+         const downloadURLs = results
+            .filter(
+               (result) =>
+                  result.status === 'fulfilled' && result.value !== null
+            )
+            .map((result) => result.value);
+
+         return downloadURLs;
       } catch (error) {
          console.error('Error uploading files: ', error);
          throw error;
@@ -177,83 +184,31 @@ export default function ChatWindow() {
    };
 
    const handleClickOutside = (event) => {
-      if (pickerRef.current && !pickerRef.current.contains(event.target)) {
+      if (
+         pickerRef.current &&
+         !pickerRef.current.contains(event.target) &&
+         !iconEmoji.current.contains(event.target)
+      ) {
          setOpenEmoji(false);
       }
+   };
+
+   const handleEmojiOpen = () => {
+      setOpenEmoji((prevValue) => !prevValue);
    };
 
    return (
       <WrapperStyled activeitem={activeItem ? 1 : 0}>
          {selectedRoom.id || selectedRoomPrivate.id ? (
             <>
-               <HeaderStyled>
-                  <div
-                     className='back-mobile'
-                     onClick={() => setActiveItem(false)}
-                  >
-                     <ArrowLeftOutlined />
-                  </div>
-                  <div className='header__info'>
-                     {selectedRoomPrivate.id && (
-                        <div className='header__wrapper'>
-                           {otherMember?.displayName ? (
-                              <Avatar
-                                 src={otherMember?.photoURL}
-                                 alt='error'
-                                 size={34}
-                              />
-                           ) : (
-                              <Avatar
-                                 icon={<UserOutlined />}
-                                 size={34}
-                                 alt='Error'
-                              />
-                           )}
-
-                           <span className='header__title'>
-                              {otherMember?.displayName ?? 'Anonymous'}
-                           </span>
-                        </div>
-                     )}
-                     {selectedRoom.id && (
-                        <>
-                           <p className='header__title'> {selectedRoom.name}</p>
-                           <span className='header__description'>
-                              {selectedRoom?.description}
-                           </span>
-                        </>
-                     )}
-                  </div>
-                  {selectedRoom.id && (
-                     <ButtonGroupStyled>
-                        <WrapperButtonInvite>
-                           <Button
-                              type='text'
-                              icon={<UserAddOutlined />}
-                              onClick={() => setIsInviteMemberVisible(true)}
-                           >
-                              Add member
-                           </Button>
-                        </WrapperButtonInvite>
-                        <Avatar.Group size='sm' maxCount={2}>
-                           {members.map((member) => (
-                              <Tooltip
-                                 title={member.displayName}
-                                 key={member.uid}
-                              >
-                                 <Avatar src={member.photoURL} key={member.uid}>
-                                    {member.photoURL
-                                       ? ''
-                                       : member.displayName
-                                            ?.charAt(0)
-                                            ?.toUpperCase()}
-                                 </Avatar>
-                              </Tooltip>
-                           ))}
-                        </Avatar.Group>
-                     </ButtonGroupStyled>
-                  )}
-               </HeaderStyled>
+               <HeaderChatWindow
+                  otherMember={otherMember}
+                  selectedRoomPrivate={selectedRoomPrivate}
+                  selectedRoom={selectedRoom}
+                  members={members}
+                  setIsInviteMemberVisible={setIsInviteMemberVisible}
+                  setActiveItem={setActiveItem}
+               />
                <ContentStyled>
                   <MessageListStyled>
                      {messages.map((message) => {
@@ -332,26 +287,26 @@ export default function ChatWindow() {
                         </div>
                      </Form.Item>
 
-                     <SubFeature
-                        onClick={() => setOpenEmoji((preValue) => !preValue)}
-                     >
-                        <SmileOutlined />
-                     </SubFeature>
-                     <PopupEmoji>
-                        <div
-                           style={{
-                              position: 'absolute',
-                              bottom: '50px',
-                              right: 0,
-                           }}
-                           ref={pickerRef}
-                        >
-                           <EmojiPicker
-                              open={openEmoji}
-                              onEmojiClick={handleEmojiSelect}
-                           />
-                        </div>
-                     </PopupEmoji>
+                     <div style={{ position: 'relative' }}>
+                        <SubFeature onClick={handleEmojiOpen} ref={iconEmoji}>
+                           <SmileOutlined />
+                        </SubFeature>
+                        <PopupEmoji>
+                           <div
+                              style={{
+                                 position: 'absolute',
+                                 bottom: '50px',
+                                 right: 0,
+                              }}
+                              ref={pickerRef}
+                           >
+                              <EmojiPicker
+                                 open={openEmoji}
+                                 onEmojiClick={handleEmojiSelect}
+                              />
+                           </div>
+                        </PopupEmoji>
+                     </div>
 
                      <Button
                         type='primary'
@@ -388,54 +343,6 @@ const WrapperStyled = styled.div`
    }
 `;
 
-const HeaderStyled = styled.div`
-   display: flex;
-   justify-content: space-between;
-   height: 58px;
-   padding: 0 16px;
-   align-items: center;
-
-   .back-mobile {
-      display: none;
-   }
-
-   .header {
-      &__info {
-         display: flex;
-         flex-direction: column;
-         justify-content: center;
-         font-size: 16px;
-      }
-
-      &__wrapper {
-         display: flex;
-         align-items: center;
-      }
-
-      &__title {
-         margin: 0;
-         font-weight: 600;
-         margin-inline: 5px;
-      }
-
-      &__description {
-         font-size: 12px;
-         margin-inline: 5px;
-      }
-   }
-
-   @media (max-width: 425px) {
-      .back-mobile {
-         display: block;
-      }
-   }
-`;
-
-const ButtonGroupStyled = styled.div`
-   display: flex;
-   align-items: center;
-`;
-
 const ContentStyled = styled.div`
    height: calc(96vh - 75px);
    display: flex;
@@ -462,10 +369,6 @@ const InputStyled = styled(Input)`
 
 const MessageListStyled = styled.div`
    overflow-y: auto;
-`;
-
-const WrapperButtonInvite = styled.div`
-   margin: 0 4px;
 `;
 
 const DividerStyled = styled.div`
