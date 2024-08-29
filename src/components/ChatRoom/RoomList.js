@@ -11,7 +11,12 @@ import {
 } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { AuthContext } from '../Context/AuthProvider';
-import { MoreOutlined } from '@ant-design/icons';
+import {
+   AppstoreOutlined,
+   LockOutlined,
+   MoreOutlined,
+   TeamOutlined,
+} from '@ant-design/icons';
 import { Modal } from 'antd';
 
 export default function RoomList() {
@@ -92,16 +97,20 @@ export default function RoomList() {
       <PanelStyled>
          <FilterStatus>
             <FilterButton
-               onClick={() => handleFilterByStatus('all')}
-               bgcolor='#a3cbf8'
-               color='#fff'
+               // bgcolor='#a3cbf8'
+               bgcolor='#fff'
+               color='#a3cbf8'
+               border='#f0f2f7'
+               icon={<AppstoreOutlined />}
             >
                All
             </FilterButton>
             <FilterButton
                onClick={() => handleFilterByStatus('rooms')}
-               bgcolor='#bfe1f7'
-               color='#fff'
+               bgcolor='#fff'
+               color='#a3cbf8'
+               border='#f0f2f7'
+               icon={<TeamOutlined />}
             >
                Room
             </FilterButton>
@@ -110,6 +119,7 @@ export default function RoomList() {
                bgcolor='#fff'
                color='#a3cbf8'
                border='#f0f2f7'
+               icon={<LockOutlined />}
             >
                Private
             </FilterButton>
@@ -323,6 +333,7 @@ const FilterButton = styled(Button)`
    font-weight: 500;
    font-size: 14px;
    border: 1px solid ${(props) => (props.border ? props.border : '#fff')};
+   border-radius: 40px;
 
    &:hover {
       color: ${(props) => (props.color ? props.color : '#000')} !important;

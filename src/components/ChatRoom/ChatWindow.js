@@ -1,6 +1,7 @@
 import {
    ArrowLeftOutlined,
    PaperClipOutlined,
+   SendOutlined,
    SmileOutlined,
    UserAddOutlined,
    UserOutlined,
@@ -356,7 +357,7 @@ export default function ChatWindow() {
                         onClick={handleOnSubmit}
                         style={{ marginBottom: '4px' }}
                      >
-                        Send
+                        <SendOutlined />
                      </Button>
                   </FormStyled>
                </ContentStyled>
