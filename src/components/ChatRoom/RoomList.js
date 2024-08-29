@@ -97,7 +97,7 @@ export default function RoomList() {
       <PanelStyled>
          <FilterStatus>
             <FilterButton
-               // bgcolor='#a3cbf8'
+               onClick={() => handleFilterByStatus('all')}
                bgcolor='#fff'
                color='#a3cbf8'
                border='#f0f2f7'
