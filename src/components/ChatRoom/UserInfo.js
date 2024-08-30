@@ -32,7 +32,9 @@ export default function UserInfo() {
       const fetchUsers = async () => {
          setLoading(true);
          try {
-            const querySnapshot = await getDocs(
+            let querySnapshot;
+
+            const emailQuerySnapshot = await getDocs(
                query(
                   collection(db, 'users'),
                   where('email', '>=', debouncedSearchTerm),
@@ -41,11 +43,22 @@ export default function UserInfo() {
                )
             );
 
+            if (emailQuerySnapshot.empty) {
+               querySnapshot = await getDocs(
+                  query(
+                     collection(db, 'users'),
+                     where('keywords', 'array-contains', debouncedSearchTerm)
+                  )
+               );
+            } else {
+               querySnapshot = emailQuerySnapshot;
+            }
+
             const userList = querySnapshot.docs.map((doc) => ({
-               label: doc.data().displayName ?? 'Anonymous',
-               value: doc.data().uid,
-               photoURL: doc.data().photoURL,
-               uid: doc.data().uid,
+               label: doc?.data()?.displayName ?? 'Anonymous',
+               value: doc?.data()?.uid,
+               photoURL: doc?.data()?.photoURL,
+               uid: doc?.data()?.uid,
             }));
 
             setUsers(userList);
@@ -165,19 +178,21 @@ export default function UserInfo() {
             loading={loading.toString()}
          />
 
-         {!loading &&
-            users.length > 0 &&
-            users.map((user) => {
-               return (
-                  <StyledUser
-                     key={user.uid}
-                     onClick={() => handleChatPrivate(user.uid)}
-                  >
-                     <Avatar size={40} src={user.photoURL} alt='Error' />
-                     {user.label}
-                  </StyledUser>
-               );
-            })}
+         {!loading && users.length > 0 && (
+            <WrapperUserList>
+               {users.map((user) => {
+                  return (
+                     <StyledUser
+                        key={user.uid}
+                        onClick={() => handleChatPrivate(user.uid)}
+                     >
+                        <Avatar size={40} src={user.photoURL} alt='Error' />
+                        {user.label}
+                     </StyledUser>
+                  );
+               })}
+            </WrapperUserList>
+         )}
       </WrapperStyled>
    );
 }
@@ -185,10 +200,9 @@ export default function UserInfo() {
 const WrapperStyled = styled.div`
    display: flex;
    flex-wrap: wrap;
-   padding: 1rem 1.2rem;
+   padding: 0.4rem 1.2rem;
    border-bottom: 1px solid #eee;
    align-items: center;
-   gap: 1rem;
    position: relative;
    justify-content: space-between;
 
@@ -213,6 +227,7 @@ const UserInfoStyled = styled.div`
 
 const InputStyled = styled(Input)`
    border-radius: 50px;
+   margin: 8px 0;
 `;
 
 const StyledLogoutIcon = styled(LogoutOutlined)`
@@ -234,7 +249,7 @@ const StyledUser = styled.div`
    display: flex;
    align-items: center;
    width: 100%;
-   margin: 5px 0;
+   margin: 8px 0;
    padding: 8px 12px;
    height: 60px;
    background-color: #f9f9f9;
@@ -253,4 +268,10 @@ const StyledUser = styled.div`
       background-color: #f0f0f0;
       cursor: pointer;
    }
+`;
+
+const WrapperUserList = styled.div`
+   width: 100%;
+   max-height: 220px;
+   overflow-y: auto;
 `;

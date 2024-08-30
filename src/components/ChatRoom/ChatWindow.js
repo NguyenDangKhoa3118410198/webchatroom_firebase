@@ -49,7 +49,7 @@ export default function ChatWindow() {
          if (messagesEndRef.current) {
             messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
          }
-      }, 400);
+      }, 800);
    };
 
    useEffect(() => {

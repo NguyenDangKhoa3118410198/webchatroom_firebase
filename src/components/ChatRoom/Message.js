@@ -1,5 +1,5 @@
 import { Avatar, Dropdown, Image, Menu, Tooltip, Typography } from 'antd';
-import React from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 import { db } from '../firebase/config';
 import { deleteDoc, doc } from 'firebase/firestore';
@@ -117,6 +117,15 @@ export default function Message({
       </Menu>
    );
 
+   const isValidURL = useCallback((string) => {
+      try {
+         new URL(string);
+         return true;
+      } catch (err) {
+         return false;
+      }
+   }, []);
+
    return (
       <WrapperStyled $author={author} key={id}>
          {text.trim() ? (
@@ -147,7 +156,18 @@ export default function Message({
                   <div className='wrapper-message'>
                      <div className='format-message'>
                         <div className='message'>
-                           <Typography.Text>{text}</Typography.Text>
+                           {isValidURL(text) ? (
+                              <a
+                                 className='text-hyperlink'
+                                 href={text}
+                                 target='_blank'
+                                 rel='noopener noreferrer'
+                              >
+                                 <Typography.Text>{text}</Typography.Text>
+                              </a>
+                           ) : (
+                              <Typography.Text>{text}</Typography.Text>
+                           )}
                         </div>
                      </div>
                   </div>
@@ -367,6 +387,10 @@ const WrapperStyled = styled.div`
 
    &:hover .more-icon {
       opacity: 1;
+   }
+
+   .text-hyperlink {
+      color: ${(props) => (props.$author ? 'white' : 'black')};
    }
 `;
 
