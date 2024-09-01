@@ -4,7 +4,14 @@ import {
    SmileOutlined,
 } from '@ant-design/icons';
 import { Button, Form, Input, message } from 'antd';
-import React, { useContext, useState, useMemo, useRef, useEffect } from 'react';
+import React, {
+   useContext,
+   useState,
+   useMemo,
+   useRef,
+   useEffect,
+   useLayoutEffect,
+} from 'react';
 import styled from 'styled-components';
 import Message from './Message';
 import { AppContext } from '../Context/AppProvider';
@@ -40,25 +47,6 @@ export default function ChatWindow() {
    const otherMember = memberPrivate.find((o) => o.uid !== uid);
    let lastDate = '';
 
-   useEffect(() => {
-      scrollToBottom();
-   }, [selectedRoom, selectedRoomPrivate]);
-
-   const scrollToBottom = () => {
-      setTimeout(() => {
-         if (messagesEndRef.current) {
-            messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-         }
-      }, 800);
-   };
-
-   useEffect(() => {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => {
-         document.removeEventListener('mousedown', handleClickOutside);
-      };
-   }, []);
-
    const conditionMessage = useMemo(() => {
       if (selectedRoom.id) {
          return {
@@ -78,6 +66,25 @@ export default function ChatWindow() {
    }, [selectedRoom.id, selectedRoomPrivate.id]);
 
    const messages = useFirestore('messages', conditionMessage);
+
+   useLayoutEffect(() => {
+      scrollToBottom();
+   }, [messages]);
+
+   const scrollToBottom = () => {
+      setTimeout(() => {
+         if (messagesEndRef.current) {
+            messagesEndRef.current.scrollIntoView();
+         }
+      }, 400);
+   };
+
+   useEffect(() => {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+         document.removeEventListener('mousedown', handleClickOutside);
+      };
+   }, []);
 
    const handleInputChange = (e) => {
       setInputValue(e.target.value);
@@ -143,7 +150,7 @@ export default function ChatWindow() {
    const uploadFiles = async (files) => {
       const storage = getStorage();
 
-      const uploadPromises = files.map(async (file) => {
+      const fileUploadPromises = files.map(async (file) => {
          try {
             const fileType = file.type;
             const storageRef = ref(storage, `${fileType}s/${file.name}`);
@@ -158,21 +165,15 @@ export default function ChatWindow() {
          }
       });
 
-      try {
-         const results = await Promise.allSettled(uploadPromises);
+      const results = await Promise.allSettled(fileUploadPromises);
 
-         const downloadURLs = results
-            .filter(
-               (result) =>
-                  result.status === 'fulfilled' && result.value !== null
-            )
-            .map((result) => result.value);
+      const fileUploadResults = results
+         .filter(
+            (result) => result.status === 'fulfilled' && result.value !== null
+         )
+         .map((result) => result.value);
 
-         return downloadURLs;
-      } catch (error) {
-         console.error('Error uploading files: ', error);
-         throw error;
-      }
+      return fileUploadResults;
    };
 
    const handleUpload = () => {
