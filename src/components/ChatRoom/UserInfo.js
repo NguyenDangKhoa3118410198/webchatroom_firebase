@@ -22,7 +22,8 @@ import {
 
 export default function UserInfo() {
    const { displayName, photoURL, uid } = useContext(AuthContext);
-   const { setAddRoomVisible, setSelectedRoomId } = useContext(AppContext);
+   const { setAddRoomVisible, setSelectedRoomId, setActiveItem } =
+      useContext(AppContext);
    const [search, setSearch] = useState('');
    const [users, setUsers] = useState([]);
    const [loading, setLoading] = useState(false);
@@ -140,6 +141,8 @@ export default function UserInfo() {
             });
             console.log('Phòng chat mới đã được tạo.');
          }
+         setSelectedRoomId(roomId);
+         setActiveItem(true);
       } catch (error) {
          console.error(
             'Error checking room existence or creating room: ',

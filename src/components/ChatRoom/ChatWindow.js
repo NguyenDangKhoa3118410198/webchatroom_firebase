@@ -1,4 +1,5 @@
 import {
+   AudioOutlined,
    PaperClipOutlined,
    SendOutlined,
    SmileOutlined,
@@ -76,7 +77,7 @@ export default function ChatWindow() {
          if (messagesEndRef.current) {
             messagesEndRef.current.scrollIntoView();
          }
-      }, 400);
+      }, 600);
    };
 
    useEffect(() => {
@@ -269,6 +270,10 @@ export default function ChatWindow() {
                      />
                      <SubFeature onClick={handleUpload}>
                         <PaperClipOutlined />
+                     </SubFeature>
+
+                     <SubFeature>
+                        <AudioOutlined />
                      </SubFeature>
 
                      <Form.Item

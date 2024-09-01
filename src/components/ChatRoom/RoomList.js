@@ -13,6 +13,7 @@ import { db } from '../firebase/config';
 import { AuthContext } from '../Context/AuthProvider';
 import {
    AppstoreOutlined,
+   ClearOutlined,
    LockOutlined,
    MoreOutlined,
    TeamOutlined,
@@ -178,7 +179,8 @@ export default function RoomList() {
                      items={[
                         {
                            key: 'delete',
-                           label: 'Delete all',
+                           label: 'Delete All',
+                           icon: <ClearOutlined style={{ fontSize: '16px' }} />,
                            onClick: () =>
                               handleDeleteAllMessageByRoomId(item.id),
                         },

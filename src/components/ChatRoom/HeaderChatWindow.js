@@ -1,5 +1,6 @@
 import {
    ArrowLeftOutlined,
+   EllipsisOutlined,
    UserAddOutlined,
    UserOutlined,
 } from '@ant-design/icons';
@@ -22,21 +23,26 @@ export const HeaderChatWindow = ({
          </div>
          <div className='header__info'>
             {selectedRoomPrivate.id && (
-               <div className='header__wrapper'>
-                  {otherMember?.displayName ? (
-                     <Avatar
-                        src={otherMember?.photoURL}
-                        alt='error'
-                        size={34}
-                     />
-                  ) : (
-                     <Avatar icon={<UserOutlined />} size={34} alt='Error' />
-                  )}
+               <HeaderContent>
+                  <div className='header__wrapper'>
+                     {otherMember?.displayName ? (
+                        <Avatar
+                           src={otherMember?.photoURL}
+                           alt='error'
+                           size={34}
+                        />
+                     ) : (
+                        <Avatar icon={<UserOutlined />} size={34} alt='Error' />
+                     )}
 
-                  <span className='header__title'>
-                     {otherMember?.displayName ?? 'Anonymous'}
-                  </span>
-               </div>
+                     <span className='header__title'>
+                        {otherMember?.displayName ?? 'Anonymous'}
+                     </span>
+                  </div>
+                  <div className='header-detail'>
+                     <EllipsisOutlined style={{ fontSize: '24px' }} />
+                  </div>
+               </HeaderContent>
             )}
             {selectedRoom.id && (
                <>
@@ -75,12 +81,22 @@ export const HeaderChatWindow = ({
    );
 };
 
+const HeaderContent = styled.div`
+   width: 100%;
+   display: flex;
+
+   .header-detail {
+      margin-left: auto;
+   }
+`;
+
 const HeaderStyled = styled.div`
    display: flex;
    justify-content: space-between;
    height: 58px;
    padding: 0 16px;
    align-items: center;
+   width: 100%;
 
    .back-mobile {
       display: none;
@@ -92,11 +108,13 @@ const HeaderStyled = styled.div`
          flex-direction: column;
          justify-content: center;
          font-size: 16px;
+         width: 100%;
       }
 
       &__wrapper {
          display: flex;
          align-items: center;
+         margin-inline: 18px;
       }
 
       &__title {

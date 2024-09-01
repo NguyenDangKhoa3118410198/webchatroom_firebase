@@ -254,11 +254,16 @@ export default function Message({
                               <MoreOutlined className='more-icon' color='red' />
                            </Dropdown>
                         </div>
+                        <div className='message-date'>
+                           <Typography.Text className='date'>
+                              {formatTime(createAt?.seconds)}
+                           </Typography.Text>
+                        </div>
                      </div>
                   );
                } else {
                   return (
-                     <div style={{ position: 'relative' }}>
+                     <div className='message-layout-container'>
                         <p key={id}>Unsupported file type: {fileType}</p>
                         <div className='more-options'>
                            <Dropdown
