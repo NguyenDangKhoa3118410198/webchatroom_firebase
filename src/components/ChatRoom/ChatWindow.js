@@ -92,30 +92,45 @@ export default function ChatWindow() {
    };
 
    const handleOnSubmit = async () => {
-      if (!inputValue.trim() && selectedFiles.length === 0) {
+      if ((!inputValue || !inputValue.trim()) && selectedFiles.length === 0) {
          return;
       }
 
       try {
          const currentTime = new Date();
          let fileURLs = [];
+
          if (selectedFiles.length > 0) {
             fileURLs = await uploadFiles(selectedFiles);
          }
 
-         const messageData = {
-            text: inputValue.trim(),
-            uid,
-            photoURL,
-            roomId: selectedRoom.id || selectedRoomPrivate.id,
-            displayName,
-            fileURLs,
-            createdAt: currentTime,
-         };
-
-         await addDocument(messageData, 'messages');
-
          const roomId = selectedRoom.id || selectedRoomPrivate.id;
+
+         if (inputValue.trim()) {
+            const messageData = {
+               text: inputValue.trim(),
+               uid,
+               photoURL,
+               roomId,
+               displayName,
+               createdAt: currentTime,
+            };
+            await addDocument(messageData, 'messages');
+         }
+
+         for (const fileData of fileURLs) {
+            const messageData = {
+               text: '',
+               uid,
+               photoURL,
+               roomId,
+               displayName,
+               fileURLs: [fileData],
+               createdAt: currentTime,
+            };
+            await addDocument(messageData, 'messages');
+         }
+
          if (roomId.includes('_')) {
             await updateDoc(doc(db, 'privateChats', roomId), {
                latestMessageTime: currentTime,
