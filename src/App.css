@@ -19,7 +19,7 @@ body {
 
 html *::-webkit-scrollbar {
    border-radius: 0;
-   width: 7px;
+   width: 6px;
 }
 
 html *::-webkit-scrollbar-thumb {

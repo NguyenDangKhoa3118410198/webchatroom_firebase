@@ -1,5 +1,6 @@
 import {
    AudioOutlined,
+   DownOutlined,
    PaperClipOutlined,
    SendOutlined,
    SmileOutlined,
@@ -46,6 +47,8 @@ export default function ChatWindow() {
    const pickerRef = useRef(null);
    const iconEmoji = useRef(null);
    const otherMember = memberPrivate.find((o) => o.uid !== uid);
+   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
+   const chatContainerRef = useRef(null);
    let lastDate = '';
 
    const conditionMessage = useMemo(() => {
@@ -68,9 +71,46 @@ export default function ChatWindow() {
 
    const messages = useFirestore('messages', conditionMessage);
 
+   useEffect(() => {
+      const handleScroll = () => {
+         const container = chatContainerRef.current;
+
+         if (container) {
+            const isScrollPresent =
+               container.scrollHeight > container.clientHeight;
+
+            const scrollFromBottom =
+               container.scrollHeight -
+               container.scrollTop -
+               container.clientHeight;
+
+            if (isScrollPresent) {
+               if (scrollFromBottom > 200) {
+                  setShowScrollToBottom(true);
+               } else {
+                  setShowScrollToBottom(false);
+               }
+            } else {
+               setShowScrollToBottom(false);
+            }
+         }
+      };
+
+      const container = chatContainerRef.current;
+      if (container) {
+         container.addEventListener('scroll', handleScroll);
+      }
+
+      return () => {
+         if (container) {
+            container.removeEventListener('scroll', handleScroll);
+         }
+      };
+   }, [selectedRoom.id, selectedRoomPrivate.id, messages]);
+
    useLayoutEffect(() => {
       scrollToBottom();
-   }, [messages]);
+   }, [messages, selectedRoom.id, selectedRoomPrivate.id]);
 
    const scrollToBottom = () => {
       setTimeout(() => {
@@ -119,17 +159,19 @@ export default function ChatWindow() {
             await addDocument(messageData, 'messages');
          }
 
-         for (const fileData of fileURLs) {
-            const messageData = {
-               text: '',
-               uid,
-               photoURL,
-               roomId,
-               displayName,
-               fileURLs: [fileData],
-               createdAt: currentTime,
-            };
-            await addDocument(messageData, 'messages');
+         if (fileURLs.length > 0) {
+            for (const fileData of fileURLs) {
+               const messageData = {
+                  text: '',
+                  uid,
+                  photoURL,
+                  roomId,
+                  displayName,
+                  fileURLs: [fileData],
+                  createdAt: currentTime,
+               };
+               await addDocument(messageData, 'messages');
+            }
          }
 
          if (roomId.includes('_')) {
@@ -226,8 +268,13 @@ export default function ChatWindow() {
                   setIsInviteMemberVisible={setIsInviteMemberVisible}
                   setActiveItem={setActiveItem}
                />
-               <ContentStyled>
-                  <MessageListStyled>
+               <ContentStyled style={{ position: 'relative' }}>
+                  {showScrollToBottom && (
+                     <ButtonScroll onClick={scrollToBottom} shape='circle'>
+                        <DownOutlined />
+                     </ButtonScroll>
+                  )}
+                  <MessageListStyled ref={chatContainerRef}>
                      {messages.map((message) => {
                         const messageDate = formatDate(
                            message?.createdAt?.seconds
@@ -258,6 +305,7 @@ export default function ChatWindow() {
                      })}
                      <div ref={messagesEndRef} />
                   </MessageListStyled>
+
                   <FormStyled form={form}>
                      <input
                         ref={fileInputRef}
@@ -449,4 +497,12 @@ const LabelWaittingChat = styled.h3`
 
 const PopupEmoji = styled.div`
    position: relative;
+`;
+
+const ButtonScroll = styled(Button)`
+   position: absolute;
+   bottom: 10%;
+   left: 50%;
+   transform: translateX(-50%);
+   z-index: 100;
 `;
