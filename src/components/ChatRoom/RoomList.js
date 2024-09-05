@@ -6,6 +6,7 @@ import {
    collection,
    deleteDoc,
    getDocs,
+   onSnapshot,
    query,
    where,
 } from 'firebase/firestore';
@@ -32,6 +33,7 @@ export default function RoomList() {
    const [userDetails, setUserDetails] = useState({});
    const { confirm } = Modal;
    const [filterStatus, setFilterStatus] = useState('all');
+   const [unreadMessagesCount, setUnreadMessagesCount] = useState({});
 
    const showConfirm = () => {
       return new Promise((resolve) => {
@@ -70,6 +72,41 @@ export default function RoomList() {
 
       fetchUserDetails();
    }, [roomPrivate, uid]);
+
+   useEffect(() => {
+      let roomIds;
+      const roomIdsPrivate = roomPrivate.map((o) => o.id);
+      const roomIdsPublic = rooms.map((o) => o.id);
+
+      roomIds = [...roomIdsPrivate, ...roomIdsPublic];
+
+      const unsubscribe = roomIds.map((roomId) => {
+         const q = query(
+            collection(db, 'messages'),
+            where('roomId', '==', roomId)
+         );
+
+         return onSnapshot(q, (querySnapshot) => {
+            let unreadCount = 0;
+
+            querySnapshot.forEach((doc) => {
+               const seen = doc.data().seen;
+               if (seen && seen[`${uid}`] === false) {
+                  unreadCount++;
+               }
+            });
+
+            setUnreadMessagesCount((prevCounts) => ({
+               ...prevCounts,
+               [roomId]: unreadCount,
+            }));
+         });
+      });
+
+      return () => {
+         unsubscribe.forEach((unsub) => unsub());
+      };
+   }, [roomPrivate, rooms, uid]);
 
    const handleDeleteAllMessageByRoomId = async (roomId) => {
       const confirm = await showConfirm();
@@ -128,6 +165,7 @@ export default function RoomList() {
          {(filterStatus === 'rooms' || filterStatus === 'all') &&
             rooms.map((room) => {
                const avatarText = room.name.charAt(0).toUpperCase();
+               const unreadCount = unreadMessagesCount[room.id] || 0;
                const menu = (
                   <Menu
                      items={[
@@ -163,6 +201,13 @@ export default function RoomList() {
                            <MoreOutlined className='more-icon' />
                         </Dropdown>
                      </div>
+                     {unreadCount && unreadCount > 0 ? (
+                        <NotReadWrapper>
+                           <div className='not-read-text'>
+                              {unreadCount ?? 0}
+                           </div>
+                        </NotReadWrapper>
+                     ) : null}
                   </LinkStyled>
                );
             })}
@@ -173,7 +218,7 @@ export default function RoomList() {
                const otherMember = userDetails[otherParticipantId];
                const avatarText =
                   otherMember?.displayName?.charAt(0)?.toUpperCase() || '?';
-
+               const unreadCount = unreadMessagesCount[item.id] || 0;
                const menu = (
                   <Menu
                      items={[
@@ -222,6 +267,13 @@ export default function RoomList() {
                               <MoreOutlined className='more-icon' />
                            </Dropdown>
                         </div>
+                        {unreadCount && unreadCount > 0 ? (
+                           <NotReadWrapper>
+                              <div className='not-read-text'>
+                                 {unreadCount ?? 0}
+                              </div>
+                           </NotReadWrapper>
+                        ) : null}
                      </LinkStyled>
                   </div>
                );
@@ -342,5 +394,20 @@ const FilterButton = styled(Button)`
    }
    span:hover {
       color: ${(props) => (props.color ? props.color : '#000')};
+   }
+`;
+
+const NotReadWrapper = styled.div`
+   width: 18px;
+   height: 18px;
+   background-color: #fc2727;
+   text-align: center;
+   border-radius: 50%;
+   margin: 4px 2px 4px 4px;
+
+   .not-read-text {
+      text-align: center;
+      font-size: 11px;
+      color: #fff;
    }
 `;

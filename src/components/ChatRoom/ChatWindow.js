@@ -12,7 +12,7 @@ import React, {
    useMemo,
    useRef,
    useEffect,
-   useLayoutEffect,
+   useCallback,
 } from 'react';
 import styled from 'styled-components';
 import Message from './Message';
@@ -21,7 +21,15 @@ import { addDocument } from '../firebase/services';
 import { AuthContext } from '../Context/AuthProvider';
 import useFirestore from '../../hooks/useFirestore';
 import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
-import { doc, updateDoc } from 'firebase/firestore';
+import {
+   collection,
+   doc,
+   getDocs,
+   query,
+   updateDoc,
+   where,
+   writeBatch,
+} from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { ReactComponent as WaittingChat } from '../../imgs/waitting-chat.svg';
 import { HeaderChatWindow } from './HeaderChatWindow';
@@ -36,6 +44,7 @@ export default function ChatWindow() {
       setIsInviteMemberVisible,
       activeItem,
       setActiveItem,
+      selectedRoomId,
    } = useContext(AppContext);
    const { uid, photoURL, displayName } = useContext(AuthContext);
    const [inputValue, setInputValue] = useState('');
@@ -106,19 +115,57 @@ export default function ChatWindow() {
             container.removeEventListener('scroll', handleScroll);
          }
       };
-   }, [selectedRoom.id, selectedRoomPrivate.id, messages]);
+   }, [selectedRoom.id, selectedRoomPrivate.id]);
 
-   useLayoutEffect(() => {
-      scrollToBottom();
-   }, [messages, selectedRoom.id, selectedRoomPrivate.id]);
-
-   const scrollToBottom = () => {
+   const scrollToEnd = (timeout = 0) => {
       setTimeout(() => {
          if (messagesEndRef.current) {
             messagesEndRef.current.scrollIntoView();
          }
-      }, 600);
+      }, timeout);
    };
+
+   const updateSeenMessages = useCallback(
+      async (timeout = 0) => {
+         scrollToEnd(timeout);
+
+         if (selectedRoomId) {
+            const q = query(
+               collection(db, 'messages'),
+               where('roomId', '==', selectedRoomId)
+            );
+
+            const querySnapshot = await getDocs(q);
+            const batch = writeBatch(db);
+            let hasUpdates = false;
+
+            querySnapshot.forEach((doc) => {
+               const seen = doc.data().seen;
+               const messageRef = doc.ref;
+
+               if (seen && seen[`${uid}`] === false) {
+                  batch.update(messageRef, {
+                     [`seen.${uid}`]: true,
+                  });
+                  hasUpdates = true;
+               }
+            });
+
+            if (hasUpdates) {
+               await batch.commit();
+            }
+         }
+      },
+      [selectedRoomId, uid]
+   );
+
+   useEffect(() => {
+      updateSeenMessages();
+   }, [selectedRoomId, updateSeenMessages]);
+
+   useEffect(() => {
+      scrollToEnd();
+   }, [selectedRoomId, messages]);
 
    useEffect(() => {
       document.addEventListener('mousedown', handleClickOutside);
@@ -130,6 +177,18 @@ export default function ChatWindow() {
    const handleInputChange = (e) => {
       setInputValue(e.target.value);
       setOpenEmoji(false);
+   };
+
+   const getInitialSeenStatus = (members) => {
+      const seenStatus = {};
+      members.forEach((member) => {
+         if (uid === member.uid) {
+            seenStatus[member.uid] = true;
+         } else {
+            seenStatus[member.uid] = false;
+         }
+      });
+      return seenStatus;
    };
 
    const handleOnSubmit = async () => {
@@ -146,6 +205,7 @@ export default function ChatWindow() {
          }
 
          const roomId = selectedRoom.id || selectedRoomPrivate.id;
+         const seenRoom = selectedRoom.id ? members : memberPrivate;
 
          if (inputValue.trim()) {
             const messageData = {
@@ -155,6 +215,7 @@ export default function ChatWindow() {
                roomId,
                displayName,
                createdAt: currentTime,
+               seen: getInitialSeenStatus(seenRoom),
             };
             await addDocument(messageData, 'messages');
          }
@@ -169,6 +230,7 @@ export default function ChatWindow() {
                   displayName,
                   fileURLs: [fileData],
                   createdAt: currentTime,
+                  seen: memberPrivate,
                };
                await addDocument(messageData, 'messages');
             }
@@ -191,7 +253,7 @@ export default function ChatWindow() {
          if (fileInputRef.current) {
             fileInputRef.current.value = '';
          }
-         scrollToBottom();
+         updateSeenMessages(600);
       } catch (error) {
          console.error('Error sending message:', error);
          message.error('Error sending message');
@@ -270,7 +332,7 @@ export default function ChatWindow() {
                />
                <ContentStyled style={{ position: 'relative' }}>
                   {showScrollToBottom && (
-                     <ButtonScroll onClick={scrollToBottom} shape='circle'>
+                     <ButtonScroll onClick={updateSeenMessages} shape='circle'>
                         <DownOutlined />
                      </ButtonScroll>
                   )}
