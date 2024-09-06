@@ -132,7 +132,7 @@ export default function RoomList() {
    };
 
    return (
-      <PanelStyled>
+      <>
          <FilterStatus>
             <FilterButton
                onClick={() => handleFilterByStatus('all')}
@@ -162,128 +162,149 @@ export default function RoomList() {
                Private
             </FilterButton>
          </FilterStatus>
-         {(filterStatus === 'rooms' || filterStatus === 'all') &&
-            rooms.map((room) => {
-               const avatarText = room.name.charAt(0).toUpperCase();
-               const unreadCount = unreadMessagesCount[room.id] || 0;
-               const menu = (
-                  <Menu
-                     items={[
-                        {
-                           key: 'delete',
-                           label: 'Delete all',
-                           onClick: () =>
-                              handleDeleteAllMessageByRoomId(room.id),
-                        },
-                     ]}
-                  />
-               );
-               return (
-                  <LinkStyled
-                     key={room.id}
-                     onClick={() => {
-                        setSelectedRoomId(room.id);
-                        setActiveItem(true);
-                     }}
-                     className={selectedRoomId === room.id ? 'active' : ''}
-                  >
-                     <Avatar className='avatar' size={40}>
-                        {avatarText}
-                     </Avatar>
-                     <span className='name'>{room.name}</span>
-                     <div className='more-options'>
-                        <Dropdown
-                           overlay={menu}
-                           trigger={['click']}
-                           placement='top'
-                           arrow
+         <PanelStyled>
+            {(filterStatus === 'rooms' || filterStatus === 'all') && (
+               <BorderRoom>
+                  <h1 className='title-room'>Groups</h1>
+                  {rooms.map((room) => {
+                     const avatarText = room.name.charAt(0).toUpperCase();
+                     const unreadCount = unreadMessagesCount[room.id] || 0;
+                     const menu = (
+                        <Menu
+                           items={[
+                              {
+                                 key: 'delete',
+                                 label: 'Delete all',
+                                 onClick: () =>
+                                    handleDeleteAllMessageByRoomId(room.id),
+                              },
+                           ]}
+                        />
+                     );
+                     return (
+                        <LinkStyled
+                           key={room.id}
+                           onClick={() => {
+                              setSelectedRoomId(room.id);
+                              setActiveItem(true);
+                           }}
+                           className={
+                              selectedRoomId === room.id ? 'active' : ''
+                           }
                         >
-                           <MoreOutlined className='more-icon' />
-                        </Dropdown>
-                     </div>
-                     {unreadCount && unreadCount > 0 ? (
-                        <NotReadWrapper>
-                           <div className='not-read-text'>
-                              {unreadCount ?? 0}
-                           </div>
-                        </NotReadWrapper>
-                     ) : null}
-                  </LinkStyled>
-               );
-            })}
-
-         {(filterStatus === 'private' || filterStatus === 'all') &&
-            roomPrivate.map((item) => {
-               const otherParticipantId = item.members.find((id) => id !== uid);
-               const otherMember = userDetails[otherParticipantId];
-               const avatarText =
-                  otherMember?.displayName?.charAt(0)?.toUpperCase() || '?';
-               const unreadCount = unreadMessagesCount[item.id] || 0;
-               const menu = (
-                  <Menu
-                     items={[
-                        {
-                           key: 'delete',
-                           label: 'Delete All',
-                           icon: <ClearOutlined style={{ fontSize: '16px' }} />,
-                           onClick: () =>
-                              handleDeleteAllMessageByRoomId(item.id),
-                        },
-                     ]}
-                  />
-               );
-
-               return (
-                  <div style={{ display: 'flex' }}>
-                     <LinkStyled
-                        key={item.id}
-                        onClick={() => {
-                           setSelectedRoomId(item.id);
-                           setActiveItem(true);
-                        }}
-                        className={selectedRoomId === item.id ? 'active' : ''}
-                     >
-                        {otherMember?.photoURL ? (
-                           <Avatar
-                              src={otherMember?.photoURL}
-                              className='avatar'
-                              size={40}
-                           />
-                        ) : (
                            <Avatar className='avatar' size={40}>
                               {avatarText}
                            </Avatar>
-                        )}
-                        <span className='name'>
-                           {otherMember?.displayName ?? 'Anonymous'}
-                        </span>
-                        <div className='more-options'>
-                           <Dropdown
-                              overlay={menu}
-                              trigger={['click']}
-                              placement='top'
-                              arrow
+                           <span className='name'>{room.name}</span>
+                           <div className='more-options'>
+                              <Dropdown
+                                 overlay={menu}
+                                 trigger={['click']}
+                                 placement='top'
+                                 arrow
+                              >
+                                 <MoreOutlined className='more-icon' />
+                              </Dropdown>
+                           </div>
+                           {unreadCount && unreadCount > 0 ? (
+                              <NotReadWrapper>
+                                 <div className='not-read-text'>
+                                    {unreadCount ?? 0}
+                                 </div>
+                              </NotReadWrapper>
+                           ) : null}
+                        </LinkStyled>
+                     );
+                  })}
+               </BorderRoom>
+            )}
+
+            {(filterStatus === 'private' || filterStatus === 'all') && (
+               <BorderRoom>
+                  <h1 className='title-room'>Personal</h1>
+                  {roomPrivate.map((item) => {
+                     const otherParticipantId = item.members.find(
+                        (id) => id !== uid
+                     );
+                     const otherMember = userDetails[otherParticipantId];
+                     const avatarText =
+                        otherMember?.displayName?.charAt(0)?.toUpperCase() ||
+                        '?';
+                     const unreadCount = unreadMessagesCount[item.id] || 0;
+                     const menu = (
+                        <Menu
+                           items={[
+                              {
+                                 key: 'delete',
+                                 label: 'Delete All',
+                                 icon: (
+                                    <ClearOutlined
+                                       style={{ fontSize: '16px' }}
+                                    />
+                                 ),
+                                 onClick: () =>
+                                    handleDeleteAllMessageByRoomId(item.id),
+                              },
+                           ]}
+                        />
+                     );
+
+                     return (
+                        <div style={{ display: 'flex' }}>
+                           <LinkStyled
+                              key={item.id}
+                              onClick={() => {
+                                 setSelectedRoomId(item.id);
+                                 setActiveItem(true);
+                              }}
+                              className={
+                                 selectedRoomId === item.id ? 'active' : ''
+                              }
                            >
-                              <MoreOutlined className='more-icon' />
-                           </Dropdown>
-                        </div>
-                        {unreadCount && unreadCount > 0 ? (
-                           <NotReadWrapper>
-                              <div className='not-read-text'>
-                                 {unreadCount ?? 0}
+                              {otherMember?.photoURL ? (
+                                 <Avatar
+                                    src={otherMember?.photoURL}
+                                    className='avatar'
+                                    size={40}
+                                 />
+                              ) : (
+                                 <Avatar className='avatar' size={40}>
+                                    {avatarText}
+                                 </Avatar>
+                              )}
+                              <span className='name'>
+                                 {otherMember?.displayName ?? 'Anonymous'}
+                              </span>
+                              <div className='more-options'>
+                                 <Dropdown
+                                    overlay={menu}
+                                    trigger={['click']}
+                                    placement='top'
+                                    arrow
+                                 >
+                                    <MoreOutlined className='more-icon' />
+                                 </Dropdown>
                               </div>
-                           </NotReadWrapper>
-                        ) : null}
-                     </LinkStyled>
-                  </div>
-               );
-            })}
-      </PanelStyled>
+                              {unreadCount && unreadCount > 0 ? (
+                                 <NotReadWrapper>
+                                    <div className='not-read-text'>
+                                       {unreadCount ?? 0}
+                                    </div>
+                                 </NotReadWrapper>
+                              ) : null}
+                           </LinkStyled>
+                        </div>
+                     );
+                  })}
+               </BorderRoom>
+            )}
+         </PanelStyled>
+      </>
    );
 }
 
 const PanelStyled = styled.div`
-   padding: 1rem;
+   padding: 0 10px;
    p {
       color: white;
    }
@@ -378,7 +399,17 @@ const FilterStatus = styled.div`
    display: flex;
    gap: 10px;
    justify-content: flex-start;
-   margin-bottom: 15px;
+   margin: 5px;
+   padding: 4px 10px;
+   overflow-x: auto;
+
+   &::-webkit-scrollbar {
+      display: none;
+   }
+
+   scrollbar-width: none;
+
+   -ms-overflow-style: none;
 `;
 
 const FilterButton = styled(Button)`
@@ -409,5 +440,17 @@ const NotReadWrapper = styled.div`
       text-align: center;
       font-size: 11px;
       color: #fff;
+   }
+`;
+
+const BorderRoom = styled.div`
+   border: 2px solid #f0f0f0;
+   border-radius: 20px;
+   padding: 14px;
+   margin: 0 5px 10px 5px;
+
+   .title-room {
+      font-size: 22px;
+      margin: 4px 0;
    }
 `;
