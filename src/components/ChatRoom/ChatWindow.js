@@ -1,4 +1,5 @@
 import {
+   ArrowLeftOutlined,
    AudioOutlined,
    DownOutlined,
    PaperClipOutlined,
@@ -58,6 +59,7 @@ export default function ChatWindow() {
    const otherMember = memberPrivate.find((o) => o.uid !== uid);
    const [showScrollToBottom, setShowScrollToBottom] = useState(false);
    const chatContainerRef = useRef(null);
+   const [showDetail, setShowDetail] = useState(false);
    let lastDate = '';
 
    const conditionMessage = useMemo(() => {
@@ -319,145 +321,171 @@ export default function ChatWindow() {
    };
 
    return (
-      <WrapperStyled activeitem={activeItem ? 1 : 0}>
-         {selectedRoom.id || selectedRoomPrivate.id ? (
-            <>
-               <HeaderChatWindow
-                  otherMember={otherMember}
-                  selectedRoomPrivate={selectedRoomPrivate}
-                  selectedRoom={selectedRoom}
-                  members={members}
-                  setIsInviteMemberVisible={setIsInviteMemberVisible}
-                  setActiveItem={setActiveItem}
-               />
-               <ContentStyled style={{ position: 'relative' }}>
-                  {showScrollToBottom && (
-                     <ButtonScroll onClick={updateSeenMessages} shape='circle'>
-                        <DownOutlined />
-                     </ButtonScroll>
-                  )}
-                  <MessageListStyled ref={chatContainerRef}>
-                     {messages.map((message) => {
-                        const messageDate = formatDate(
-                           message?.createdAt?.seconds
-                        );
-                        const showDivider =
-                           messageDate !== lastDate && lastDate !== '';
+      <>
+         <WrapperStyled
+            $activeitem={activeItem ? 1 : 0}
+            $showdetail={showDetail ? 1 : 0}
+         >
+            {selectedRoom.id || selectedRoomPrivate.id ? (
+               <>
+                  <HeaderChatWindow
+                     otherMember={otherMember}
+                     selectedRoomPrivate={selectedRoomPrivate}
+                     selectedRoom={selectedRoom}
+                     members={members}
+                     setIsInviteMemberVisible={setIsInviteMemberVisible}
+                     setActiveItem={setActiveItem}
+                     showDetail={showDetail}
+                     setShowDetail={setShowDetail}
+                  />
+                  <ContentStyled style={{ position: 'relative' }}>
+                     {showScrollToBottom && (
+                        <ButtonScroll
+                           onClick={updateSeenMessages}
+                           shape='circle'
+                        >
+                           <DownOutlined />
+                        </ButtonScroll>
+                     )}
+                     <MessageListStyled ref={chatContainerRef}>
+                        {messages.map((message) => {
+                           const messageDate = formatDate(
+                              message?.createdAt?.seconds
+                           );
+                           const showDivider =
+                              messageDate !== lastDate && lastDate !== '';
 
-                        lastDate = messageDate;
+                           lastDate = messageDate;
 
-                        return (
-                           <React.Fragment key={message.id}>
-                              {showDivider && (
-                                 <DividerStyled key={`divider-${message.id}`}>
-                                    {messageDate}
-                                 </DividerStyled>
-                              )}
-                              <Message
-                                 text={message.text}
-                                 photoURL={message.photoURL}
-                                 displayName={message.displayName}
-                                 createAt={message.createdAt}
-                                 author={message.uid === uid}
-                                 id={message.id}
-                                 fileURLs={message.fileURLs || []}
-                              />
-                           </React.Fragment>
-                        );
-                     })}
-                     <div ref={messagesEndRef} />
-                  </MessageListStyled>
+                           return (
+                              <React.Fragment key={message.id}>
+                                 {showDivider && (
+                                    <DividerStyled
+                                       key={`divider-${message.id}`}
+                                    >
+                                       {messageDate}
+                                    </DividerStyled>
+                                 )}
+                                 <Message
+                                    text={message.text}
+                                    photoURL={message.photoURL}
+                                    displayName={message.displayName}
+                                    createAt={message.createdAt}
+                                    author={message.uid === uid}
+                                    id={message.id}
+                                    fileURLs={message.fileURLs || []}
+                                 />
+                              </React.Fragment>
+                           );
+                        })}
+                        <div ref={messagesEndRef} />
+                     </MessageListStyled>
 
-                  <FormStyled form={form}>
-                     <input
-                        ref={fileInputRef}
-                        type='file'
-                        multiple
-                        onChange={(e) =>
-                           setSelectedFiles(Array.from(e.target.files))
-                        }
-                        style={{ display: 'none' }}
-                     />
-                     <SubFeature onClick={handleUpload}>
-                        <PaperClipOutlined />
-                     </SubFeature>
-
-                     <SubFeature>
-                        <AudioOutlined />
-                     </SubFeature>
-
-                     <Form.Item
-                        name='message'
-                        style={{ flex: 1, margin: '0 5px' }}
-                     >
-                        <div>
-                           {selectedFiles.length > 0 && (
-                              <Form.Item style={{ margin: '0 5px' }}>
-                                 <div>
-                                    {selectedFiles.map((file, index) => (
-                                       <div key={index + file.name}>
-                                          {file.name}
-                                       </div>
-                                    ))}
-                                 </div>
-                              </Form.Item>
-                           )}
-                           <InputStyled
-                              placeholder='Enter something...'
-                              autoComplete='off'
-                              value={inputValue}
-                              onChange={handleInputChange}
-                              onPressEnter={handleOnSubmit}
-                           />
-                           <Input
-                              value={inputValue}
-                              disabled
-                              readOnly
-                              style={{ display: 'none' }}
-                           />
-                        </div>
-                     </Form.Item>
-
-                     <div style={{ position: 'relative' }}>
-                        <SubFeature onClick={handleEmojiOpen} ref={iconEmoji}>
-                           <SmileOutlined />
+                     <FormStyled form={form}>
+                        <input
+                           ref={fileInputRef}
+                           type='file'
+                           multiple
+                           onChange={(e) =>
+                              setSelectedFiles(Array.from(e.target.files))
+                           }
+                           style={{ display: 'none' }}
+                        />
+                        <SubFeature onClick={handleUpload}>
+                           <PaperClipOutlined />
                         </SubFeature>
-                        <PopupEmoji>
-                           <div
-                              style={{
-                                 position: 'absolute',
-                                 bottom: '50px',
-                                 right: 0,
-                              }}
-                              ref={pickerRef}
-                           >
-                              <EmojiPicker
-                                 open={openEmoji}
-                                 onEmojiClick={handleEmojiSelect}
+
+                        <SubFeature>
+                           <AudioOutlined />
+                        </SubFeature>
+
+                        <Form.Item
+                           name='message'
+                           style={{ flex: 1, margin: '0 5px' }}
+                        >
+                           <div>
+                              {selectedFiles.length > 0 && (
+                                 <Form.Item style={{ margin: '0 5px' }}>
+                                    <div>
+                                       {selectedFiles.map((file, index) => (
+                                          <div key={index + file.name}>
+                                             {file.name}
+                                          </div>
+                                       ))}
+                                    </div>
+                                 </Form.Item>
+                              )}
+                              <InputStyled
+                                 placeholder='Enter something...'
+                                 autoComplete='off'
+                                 value={inputValue}
+                                 onChange={handleInputChange}
+                                 onPressEnter={handleOnSubmit}
+                              />
+                              <Input
+                                 value={inputValue}
+                                 disabled
+                                 readOnly
+                                 style={{ display: 'none' }}
                               />
                            </div>
-                        </PopupEmoji>
-                     </div>
+                        </Form.Item>
 
-                     <Button
-                        type='primary'
-                        onClick={handleOnSubmit}
-                        style={{ marginBottom: '4px' }}
-                     >
-                        <SendOutlined />
-                     </Button>
-                  </FormStyled>
-               </ContentStyled>
-            </>
-         ) : (
-            <WaittingChatWrapper>
-               <LabelWaittingChat>
-                  Choose a room to start chatting
-               </LabelWaittingChat>
-               <WaittingChat />
-            </WaittingChatWrapper>
+                        <div style={{ position: 'relative' }}>
+                           <SubFeature
+                              onClick={handleEmojiOpen}
+                              ref={iconEmoji}
+                           >
+                              <SmileOutlined />
+                           </SubFeature>
+                           <PopupEmoji>
+                              <div
+                                 style={{
+                                    position: 'absolute',
+                                    bottom: '50px',
+                                    right: 0,
+                                 }}
+                                 ref={pickerRef}
+                              >
+                                 <EmojiPicker
+                                    open={openEmoji}
+                                    onEmojiClick={handleEmojiSelect}
+                                 />
+                              </div>
+                           </PopupEmoji>
+                        </div>
+
+                        <Button
+                           type='primary'
+                           onClick={handleOnSubmit}
+                           style={{ marginBottom: '4px' }}
+                        >
+                           <SendOutlined />
+                        </Button>
+                     </FormStyled>
+                  </ContentStyled>
+               </>
+            ) : (
+               <WaittingChatWrapper>
+                  <LabelWaittingChat>
+                     Choose a room to start chatting
+                  </LabelWaittingChat>
+                  <WaittingChat />
+               </WaittingChatWrapper>
+            )}
+         </WrapperStyled>
+         {showDetail && activeItem && (
+            <DetailWrapperStyled>
+               <div
+                  className='back-mobile'
+                  onClick={() => setShowDetail(false)}
+               >
+                  <ArrowLeftOutlined />
+               </div>
+               Detail
+            </DetailWrapperStyled>
          )}
-      </WrapperStyled>
+      </>
    );
 }
 
@@ -471,8 +499,31 @@ const WrapperStyled = styled.div`
    overflow: hidden;
 
    @media (max-width: 425px) {
-      display: ${({ activeitem }) => (activeitem ? 'block' : 'none')};
+      display: ${(props) =>
+         props.$activeitem && !props.$showdetail ? 'block' : 'none'};
       flex: 1;
+   }
+`;
+
+const DetailWrapperStyled = styled.div`
+   margin: 20px 10px;
+   border-radius: 12px;
+   box-shadow: rgba(52, 72, 84, 0.05) 0px 0px 8px 0px;
+   background-color: #fff;
+   height: calc(100vh - 40px);
+   flex: 1;
+   overflow: hidden;
+
+   .back-mobile {
+      display: none;
+   }
+
+   @media (max-width: 425px) {
+      flex: 1;
+
+      .back-mobile {
+         display: block;
+      }
    }
 `;
 

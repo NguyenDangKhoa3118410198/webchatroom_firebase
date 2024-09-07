@@ -22,14 +22,14 @@ const SidebarStyled = styled.div`
    }
 
    @media (max-width: 425px) {
-      display: ${({ activeitem }) => (activeitem ? 'none' : 'block')};
+      display: ${(props) => (props.$activeitem ? 'none' : 'block')};
    }
 `;
 
 export default function Sidebar() {
    const { activeItem } = useContext(AppContext);
    return (
-      <SidebarStyled activeitem={activeItem ? 1 : 0}>
+      <SidebarStyled $activeitem={activeItem ? 1 : 0}>
          <UserInfo />
          <RoomList />
       </SidebarStyled>

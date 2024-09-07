@@ -15,6 +15,8 @@ export const HeaderChatWindow = ({
    members,
    setIsInviteMemberVisible,
    setActiveItem,
+   showDetail,
+   setShowDetail,
 }) => {
    return (
       <HeaderStyled>
@@ -39,7 +41,10 @@ export const HeaderChatWindow = ({
                         {otherMember?.displayName ?? 'Anonymous'}
                      </span>
                   </div>
-                  <div className='header-detail'>
+                  <div
+                     className='header-detail'
+                     onClick={() => setShowDetail((prevState) => !prevState)}
+                  >
                      <EllipsisOutlined style={{ fontSize: '24px' }} />
                   </div>
                </HeaderContent>
