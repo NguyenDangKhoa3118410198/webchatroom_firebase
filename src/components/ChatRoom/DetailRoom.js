@@ -5,15 +5,26 @@ import {
    UserOutlined,
 } from '@ant-design/icons';
 import { Avatar, Image } from 'antd';
+import { orderBy } from 'lodash';
 import React, { useState } from 'react';
 import styled from 'styled-components';
 
 export const DetailRoom = ({ setShowDetail, otherMember, messages }) => {
    const [showImages, setShowImages] = useState(false);
+
    const messagesWithFiles = messages.filter((message) => message.fileURLs);
+
    const listImages = messagesWithFiles.flatMap((message) =>
-      message?.fileURLs?.filter((file) => file?.fileType?.startsWith('image'))
+      message.fileURLs
+         .filter((file) => file.fileType.startsWith('image'))
+         .map((file) => ({
+            ...file,
+            createdAt: message.createdAt
+               ? message.createdAt.toDate()
+               : new Date(),
+         }))
    );
+   const sortedImages = orderBy(listImages, ['createdAt'], ['desc']);
 
    return (
       <DetailWrapperStyled>
@@ -37,7 +48,7 @@ export const DetailRoom = ({ setShowDetail, otherMember, messages }) => {
                      {otherMember?.displayName ?? 'Anonymous'}
                   </p>
                </div>
-               <div className='detail-conent'>
+               <div className='detail-content'>
                   <ListImages>
                      <TitleListImages
                         onClick={() => setShowImages((pre) => !pre)}
@@ -49,16 +60,16 @@ export const DetailRoom = ({ setShowDetail, otherMember, messages }) => {
                            }}
                         >
                            {showImages ? (
-                              <UpOutlined style={{ fontSize: '14px' }} />
+                              <UpOutlined style={{ fontSize: '12px' }} />
                            ) : (
-                              <DownOutlined style={{ fontSize: '14px' }} />
+                              <DownOutlined style={{ fontSize: '12px' }} />
                            )}
                         </div>
                      </TitleListImages>
 
-                     {showImages && listImages.length > 0 && (
-                        <div>
-                           {listImages.map((item, index) => (
+                     {showImages && sortedImages.length > 0 && (
+                        <div className='sort-images'>
+                           {sortedImages.map((item, index) => (
                               <Image
                                  key={index}
                                  src={item.downloadURL}
@@ -78,6 +89,7 @@ export const DetailRoom = ({ setShowDetail, otherMember, messages }) => {
 
 const DetailWrapperStyled = styled.div`
    margin: 20px 10px;
+   padding: 12px;
    border-radius: 12px;
    box-shadow: rgba(52, 72, 84, 0.05) 0px 0px 8px 0px;
    background-color: #fff;
@@ -124,7 +136,7 @@ const DetailWrapperStyled = styled.div`
 const TitleListImages = styled.div`
    display: flex;
    align-items: center;
-   margin: 4px;
+   margin: 15px 0;
    cursor: pointer;
 `;
 
@@ -135,14 +147,24 @@ const ListImages = styled.div`
    border-radius: 20px;
 
    .title-list-images {
-      font-size: 18px;
+      font-size: 15px;
       font-weight: 600;
       margin-left: 8px;
    }
 
+   .sort-images {
+      height: 400px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 8px;
+      justify-items: center;
+      align-items: center;
+      overflow-y: auto;
+   }
+
    .image {
-      margin: 4px;
-      width: 50px;
-      height: 50px;
+      width: 100%;
+      height: auto;
+      object-fit: cover;
    }
 `;
