@@ -400,8 +400,9 @@ const FilterStatus = styled.div`
    gap: 10px;
    justify-content: flex-start;
    margin: 5px;
-   padding: 4px 10px;
+   padding: 4px 10px 8px 10px;
    overflow-x: auto;
+   cursor: grab;
 
    &::-webkit-scrollbar {
       display: none;

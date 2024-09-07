@@ -462,15 +462,17 @@ export default function ChatWindow() {
 }
 
 const WrapperStyled = styled.div`
-   margin: 20px 10px 20px 10px;
+   margin: 20px 10px;
    border-radius: 12px;
    box-shadow: rgba(52, 72, 84, 0.05) 0px 0px 8px 0px;
    background-color: #fff;
    height: calc(100vh - 40px);
    flex: 2;
+   overflow: hidden;
 
    @media (max-width: 425px) {
       display: ${({ activeitem }) => (activeitem ? 'block' : 'none')};
+      flex: 1;
    }
 `;
 

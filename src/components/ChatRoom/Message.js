@@ -416,4 +416,9 @@ const FileLink = styled.a`
    background-color: #f0f0f0;
    border-radius: 14px;
    gap: 5px;
+
+   .file-name {
+      overflow-wrap: break-word;
+      word-break: break-word;
+   }
 `;
