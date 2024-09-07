@@ -91,7 +91,19 @@ const HeaderContent = styled.div`
    display: flex;
 
    .header-detail {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
       margin-left: auto;
+      cursor: pointer;
+
+      &:hover {
+         background-color: #f0f0f0;
+      }
    }
 `;
 

@@ -1,5 +1,4 @@
 import {
-   ArrowLeftOutlined,
    AudioOutlined,
    DownOutlined,
    PaperClipOutlined,
@@ -34,6 +33,7 @@ import {
 import { db } from '../firebase/config';
 import { ReactComponent as WaittingChat } from '../../imgs/waitting-chat.svg';
 import { HeaderChatWindow } from './HeaderChatWindow';
+import { DetailRoom } from './DetailRoom';
 const EmojiPicker = React.lazy(() => import('emoji-picker-react'));
 
 export default function ChatWindow() {
@@ -475,15 +475,11 @@ export default function ChatWindow() {
             )}
          </WrapperStyled>
          {showDetail && activeItem && (
-            <DetailWrapperStyled>
-               <div
-                  className='back-mobile'
-                  onClick={() => setShowDetail(false)}
-               >
-                  <ArrowLeftOutlined />
-               </div>
-               Detail
-            </DetailWrapperStyled>
+            <DetailRoom
+               setShowDetail={setShowDetail}
+               otherMember={otherMember}
+               messages={messages}
+            />
          )}
       </>
    );
@@ -502,28 +498,6 @@ const WrapperStyled = styled.div`
       display: ${(props) =>
          props.$activeitem && !props.$showdetail ? 'block' : 'none'};
       flex: 1;
-   }
-`;
-
-const DetailWrapperStyled = styled.div`
-   margin: 20px 10px;
-   border-radius: 12px;
-   box-shadow: rgba(52, 72, 84, 0.05) 0px 0px 8px 0px;
-   background-color: #fff;
-   height: calc(100vh - 40px);
-   flex: 1;
-   overflow: hidden;
-
-   .back-mobile {
-      display: none;
-   }
-
-   @media (max-width: 425px) {
-      flex: 1;
-
-      .back-mobile {
-         display: block;
-      }
    }
 `;
 
