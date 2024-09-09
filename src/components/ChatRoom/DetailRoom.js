@@ -156,7 +156,8 @@ const ListImages = styled.div`
       height: 400px;
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-      gap: 8px;
+      grid-auto-rows: 100px;
+      gap: 12px;
       justify-items: center;
       align-items: center;
       overflow-y: auto;
