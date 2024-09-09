@@ -192,14 +192,12 @@ export default function Message({
          {fileURLs &&
             fileURLs.map((file) => {
                const { downloadURL, fileType, fileName } = file;
+               const uniqueKey = `${fileName}-${fileType}`;
+
                if (fileType.startsWith('image/')) {
                   return (
-                     <div className='message-layout-container'>
-                        <ImageStyled
-                           src={downloadURL}
-                           alt='chat-img'
-                           key={fileName}
-                        />
+                     <div className='message-layout-container' key={uniqueKey}>
+                        <ImageStyled src={downloadURL} alt='chat-img' />
                         <div className='more-options'>
                            <Dropdown
                               overlay={menu}
@@ -220,7 +218,7 @@ export default function Message({
                } else if (fileType.startsWith('video/')) {
                   return (
                      <video
-                        key={id}
+                        key={uniqueKey}
                         controls
                         style={{ width: '200px', margin: '10px' }}
                      >
@@ -233,9 +231,8 @@ export default function Message({
                   fileType.startsWith('text/')
                ) {
                   return (
-                     <div className='message-layout-container'>
+                     <div className='message-layout-container' key={uniqueKey}>
                         <FileLink
-                           key={fileName}
                            href={downloadURL}
                            download={fileName}
                            target='_blank'
@@ -263,8 +260,8 @@ export default function Message({
                   );
                } else {
                   return (
-                     <div className='message-layout-container'>
-                        <p key={id}>Unsupported file type: {fileType}</p>
+                     <div className='message-layout-container' key={uniqueKey}>
+                        <p>Unsupported file type: {fileType}</p>
                         <div className='more-options'>
                            <Dropdown
                               overlay={menu}

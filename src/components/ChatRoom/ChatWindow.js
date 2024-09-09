@@ -70,22 +70,15 @@ export default function ChatWindow() {
    }, []);
 
    const conditionMessage = useMemo(() => {
-      if (selectedRoom.id) {
+      if (selectedRoomId) {
          return {
             fieldName: 'roomId',
             operator: '==',
-            compareValue: selectedRoom.id,
-         };
-      }
-      if (selectedRoomPrivate.id) {
-         return {
-            fieldName: 'roomId',
-            operator: '==',
-            compareValue: selectedRoomPrivate.id,
+            compareValue: selectedRoomId,
          };
       }
       return null;
-   }, [selectedRoom.id, selectedRoomPrivate.id]);
+   }, [selectedRoomId]);
 
    const messages = useFirestore('messages', conditionMessage);
 
@@ -372,7 +365,6 @@ export default function ChatWindow() {
                               messageDate !== lastDate && lastDate !== '';
 
                            lastDate = messageDate;
-
                            return (
                               <React.Fragment key={message.id}>
                                  {showDivider && (

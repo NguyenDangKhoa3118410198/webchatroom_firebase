@@ -235,7 +235,7 @@ export default function RoomList() {
                         <Menu
                            items={[
                               {
-                                 key: 'delete',
+                                 key: `delete ${item.id}`,
                                  label: 'Delete All',
                                  icon: (
                                     <ClearOutlined
@@ -250,9 +250,8 @@ export default function RoomList() {
                      );
 
                      return (
-                        <div style={{ display: 'flex' }}>
+                        <div key={item.id} style={{ display: 'flex' }}>
                            <LinkStyled
-                              key={item.id}
                               onClick={() => {
                                  setSelectedRoomId(item.id);
                                  setActiveItem(true);

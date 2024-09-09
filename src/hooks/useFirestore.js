@@ -25,6 +25,8 @@ const useFirestore = (
          privateChats: 'latestMessageTime',
       };
 
+      if (!condition) return;
+
       if (condition) {
          if (!condition.compareValue || !condition.compareValue.length) {
             return;
