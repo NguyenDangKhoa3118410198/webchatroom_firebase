@@ -62,6 +62,13 @@ export default function ChatWindow() {
    const [showDetail, setShowDetail] = useState(false);
    let lastDate = '';
 
+   useEffect(() => {
+      const preloadEmojiPicker = () => {
+         import('emoji-picker-react');
+      };
+      preloadEmojiPicker();
+   }, []);
+
    const conditionMessage = useMemo(() => {
       if (selectedRoom.id) {
          return {
@@ -200,12 +207,6 @@ export default function ChatWindow() {
 
       try {
          const currentTime = new Date();
-         let fileURLs = [];
-
-         if (selectedFiles.length > 0) {
-            fileURLs = await uploadFiles(selectedFiles);
-         }
-
          const roomId = selectedRoom.id || selectedRoomPrivate.id;
          const seenRoom = selectedRoom.id ? members : memberPrivate;
 
@@ -219,10 +220,26 @@ export default function ChatWindow() {
                createdAt: currentTime,
                seen: getInitialSeenStatus(seenRoom),
             };
+
             await addDocument(messageData, 'messages');
+
+            if (roomId.includes('_')) {
+               await updateDoc(doc(db, 'privateChats', roomId), {
+                  latestMessageTime: currentTime,
+               });
+            } else {
+               await updateDoc(doc(db, 'rooms', roomId), {
+                  latestMessageTime: currentTime,
+               });
+            }
+
+            setInputValue('');
+            form.resetFields(['message']);
          }
 
-         if (fileURLs.length > 0) {
+         if (selectedFiles.length > 0) {
+            const fileURLs = await uploadFiles(selectedFiles);
+
             for (const fileData of fileURLs) {
                const messageData = {
                   text: '',
@@ -232,30 +249,29 @@ export default function ChatWindow() {
                   displayName,
                   fileURLs: [fileData],
                   createdAt: currentTime,
-                  seen: memberPrivate,
+                  seen: getInitialSeenStatus(seenRoom),
                };
+
                await addDocument(messageData, 'messages');
+            }
+
+            if (roomId.includes('_')) {
+               await updateDoc(doc(db, 'privateChats', roomId), {
+                  latestMessageTime: currentTime,
+               });
+            } else {
+               await updateDoc(doc(db, 'rooms', roomId), {
+                  latestMessageTime: currentTime,
+               });
+            }
+
+            setSelectedFiles([]);
+            if (fileInputRef.current) {
+               fileInputRef.current.value = '';
             }
          }
 
-         if (roomId.includes('_')) {
-            await updateDoc(doc(db, 'privateChats', roomId), {
-               latestMessageTime: currentTime,
-            });
-         } else {
-            await updateDoc(doc(db, 'rooms', roomId), {
-               latestMessageTime: currentTime,
-            });
-         }
-
-         setInputValue('');
-         setSelectedFiles([]);
-         form.resetFields(['message']);
-
-         if (fileInputRef.current) {
-            fileInputRef.current.value = '';
-         }
-         updateSeenMessages(600);
+         updateSeenMessages(selectedFiles.length > 0 ? 600 : 0);
       } catch (error) {
          console.error('Error sending message:', error);
          message.error('Error sending message');
@@ -302,9 +318,9 @@ export default function ChatWindow() {
       fileInputRef.current.click();
    };
 
-   const handleEmojiSelect = (emoji) => {
+   const handleEmojiSelect = useCallback((emoji) => {
       setInputValue((prev) => prev + emoji?.emoji);
-   };
+   }, []);
 
    const handleClickOutside = (event) => {
       if (
