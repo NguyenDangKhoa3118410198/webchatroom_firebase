@@ -132,14 +132,12 @@ export default function UserInfo() {
                // });
                console.log('public');
             }
-            console.log('Phòng chat đã tồn tại.');
          } else {
             await setDoc(roomRef, {
                members: [uidSelected, uid],
                createdAt: new Date(),
                latestMessageTime: new Date(),
             });
-            console.log('Phòng chat mới đã được tạo.');
          }
          setSelectedRoomId(roomId);
          setActiveItem(true);

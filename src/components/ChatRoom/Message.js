@@ -1,19 +1,11 @@
-import { Avatar, Dropdown, Image, Menu, Tooltip, Typography } from 'antd';
+import { Image, Menu, Typography } from 'antd';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 import { db } from '../firebase/config';
 import { deleteDoc, doc } from 'firebase/firestore';
-import {
-   FilePdfOutlined,
-   FileWordOutlined,
-   FileExcelOutlined,
-   FilePptOutlined,
-   FileImageOutlined,
-   FileOutlined,
-   FileZipOutlined,
-   MoreOutlined,
-   UserOutlined,
-} from '@ant-design/icons';
+
+import FormatMessage from './FormatMessage';
+import { getIconFile } from '../../utils';
 
 export default function Message({
    text,
@@ -24,88 +16,12 @@ export default function Message({
    id,
    fileURLs,
 }) {
-   function formatTime(seconds) {
-      if (!seconds) return '';
-      const date = new Date(seconds * 1000);
-      const hours = date.getUTCHours().toString().padStart(2, '0');
-      const minutes = date.getUTCMinutes().toString().padStart(2, '0');
-      return `${hours}:${minutes}`;
-   }
-
    const handleDeleteMessage = async (id) => {
       try {
          await deleteDoc(doc(db, 'messages', id));
          console.log(`Message with ID ${id} deleted successfully.`);
       } catch (error) {
          console.error('Error deleting message:', error);
-      }
-   };
-
-   const getIconFile = (fileType) => {
-      const fileTypeExtension = fileType.split('/')[1] || 'unknown';
-      switch (fileTypeExtension) {
-         case 'pdf':
-            return (
-               <FilePdfOutlined
-                  style={{ fontSize: '24px', color: '#d32f2f' }}
-               />
-            );
-         case 'msword':
-         case 'vnd.openxmlformats-officedocument.wordprocessingml.document':
-            return (
-               <FileWordOutlined
-                  style={{ fontSize: '24px', color: '#1e88e5' }}
-               />
-            );
-         case 'vnd.ms-excel':
-         case 'vnd.openxmlformats-officedocument.spreadsheetml.sheet':
-         case 'csv':
-            return (
-               <FileExcelOutlined
-                  style={{ fontSize: '24px', color: '#43a047' }}
-               />
-            );
-         case 'vnd.openxmlformats-officedocument.presentationml.presentation':
-            return (
-               <FilePptOutlined
-                  style={{ fontSize: '24px', color: '#e64a19' }}
-               />
-            );
-         case 'png':
-         case 'jpeg':
-         case 'jpg':
-         case 'gif':
-            return (
-               <FileImageOutlined
-                  style={{ fontSize: '24px', color: '#2196f3' }}
-               />
-            );
-         case 'mp3':
-         case 'wav':
-            return (
-               <FileOutlined style={{ fontSize: '24px', color: '#f57c00' }} />
-            );
-         case 'mp4':
-         case 'webm':
-         case 'ogg':
-            return (
-               <FileOutlined style={{ fontSize: '24px', color: '#0288d1' }} />
-            );
-         case 'zip':
-         case 'rar':
-            return (
-               <FileZipOutlined
-                  style={{ fontSize: '24px', color: '#7b1fa2' }}
-               />
-            );
-         case 'txt':
-            return (
-               <FileOutlined style={{ fontSize: '24px', color: '#616161' }} />
-            );
-         default:
-            return (
-               <FileOutlined style={{ fontSize: '24px', color: '#616161' }} />
-            );
       }
    };
 
@@ -129,29 +45,13 @@ export default function Message({
    return (
       <WrapperStyled $author={author} key={id}>
          {text.trim() ? (
-            <div className='message-layout-container'>
-               <div className='wrapper-info'>
-                  <div className='author-info'>
-                     <Tooltip
-                        placement='left'
-                        title={displayName ?? 'Anonymous'}
-                     >
-                        {displayName ? (
-                           <Avatar
-                              size='default'
-                              src={photoURL}
-                              className='avatar-custom'
-                           >
-                              {photoURL
-                                 ? ''
-                                 : displayName?.charAt(0)?.toUpperCase()}
-                           </Avatar>
-                        ) : (
-                           <Avatar icon={<UserOutlined />} alt='Error' />
-                        )}
-                     </Tooltip>
-                  </div>
-               </div>
+            <FormatMessage
+               key={id}
+               displayName={displayName}
+               photoURL={photoURL}
+               createAt={createAt}
+               menu={menu}
+            >
                <div className='message-container'>
                   <div className='wrapper-message'>
                      <div className='format-message'>
@@ -172,22 +72,7 @@ export default function Message({
                      </div>
                   </div>
                </div>
-               <div className='more-options'>
-                  <Dropdown
-                     overlay={menu}
-                     trigger={['click']}
-                     placement='top'
-                     arrow
-                  >
-                     <MoreOutlined className='more-icon' />
-                  </Dropdown>
-               </div>
-               <div className='message-date'>
-                  <Typography.Text className='date'>
-                     {formatTime(createAt?.seconds)}
-                  </Typography.Text>
-               </div>
-            </div>
+            </FormatMessage>
          ) : null}
          {fileURLs &&
             fileURLs.map((file) => {
@@ -196,42 +81,46 @@ export default function Message({
 
                if (fileType.startsWith('image/')) {
                   return (
-                     <div className='message-layout-container' key={uniqueKey}>
+                     <FormatMessage
+                        key={uniqueKey}
+                        displayName={displayName}
+                        photoURL={photoURL}
+                        createAt={createAt}
+                        menu={menu}
+                     >
                         <ImageStyled src={downloadURL} alt='chat-img' />
-                        <div className='more-options'>
-                           <Dropdown
-                              overlay={menu}
-                              trigger={['click']}
-                              placement='top'
-                              arrow
-                           >
-                              <MoreOutlined className='more-icon' color='red' />
-                           </Dropdown>
-                        </div>
-                        <div className='message-date'>
-                           <Typography.Text className='date'>
-                              {formatTime(createAt?.seconds)}
-                           </Typography.Text>
-                        </div>
-                     </div>
+                     </FormatMessage>
                   );
                } else if (fileType.startsWith('video/')) {
                   return (
-                     <video
+                     <FormatMessage
                         key={uniqueKey}
-                        controls
-                        style={{ width: '200px', margin: '10px' }}
+                        displayName={displayName}
+                        photoURL={photoURL}
+                        createAt={createAt}
+                        menu={menu}
                      >
-                        <source src={downloadURL} type='video/mp4' />
-                        Your browser does not support the video tag.
-                     </video>
+                        <video
+                           controls
+                           style={{ width: '200px', margin: '10px' }}
+                        >
+                           <source src={downloadURL} type='video/mp4' />
+                           Your browser does not support the video tag.
+                        </video>
+                     </FormatMessage>
                   );
                } else if (
                   fileType.startsWith('application/') ||
                   fileType.startsWith('text/')
                ) {
                   return (
-                     <div className='message-layout-container' key={uniqueKey}>
+                     <FormatMessage
+                        key={uniqueKey}
+                        displayName={displayName}
+                        photoURL={photoURL}
+                        createAt={createAt}
+                        menu={menu}
+                     >
                         <FileLink
                            href={downloadURL}
                            download={fileName}
@@ -241,38 +130,34 @@ export default function Message({
                            {getIconFile(fileType)}
                            <span className='file-name'>{fileName}</span>
                         </FileLink>
-                        <div className='more-options'>
-                           <Dropdown
-                              overlay={menu}
-                              trigger={['click']}
-                              placement='top'
-                              arrow
-                           >
-                              <MoreOutlined className='more-icon' color='red' />
-                           </Dropdown>
-                        </div>
-                        <div className='message-date'>
-                           <Typography.Text className='date'>
-                              {formatTime(createAt?.seconds)}
-                           </Typography.Text>
-                        </div>
-                     </div>
+                     </FormatMessage>
+                  );
+               } else if (fileType.startsWith('audio/')) {
+                  return (
+                     <FormatMessage
+                        key={uniqueKey}
+                        displayName={displayName}
+                        photoURL={photoURL}
+                        createAt={createAt}
+                        menu={menu}
+                     >
+                        <audio controls>
+                           <source src={downloadURL} type={fileType} />
+                           Your browser does not support the audio element.
+                        </audio>
+                     </FormatMessage>
                   );
                } else {
                   return (
-                     <div className='message-layout-container' key={uniqueKey}>
+                     <FormatMessage
+                        key={uniqueKey}
+                        displayName={displayName}
+                        photoURL={photoURL}
+                        createAt={createAt}
+                        menu={menu}
+                     >
                         <p>Unsupported file type: {fileType}</p>
-                        <div className='more-options'>
-                           <Dropdown
-                              overlay={menu}
-                              trigger={['click']}
-                              placement='top'
-                              arrow
-                           >
-                              <MoreOutlined className='more-icon' color='red' />
-                           </Dropdown>
-                        </div>
-                     </div>
+                     </FormatMessage>
                   );
                }
             })}

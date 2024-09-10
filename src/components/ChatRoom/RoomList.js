@@ -206,13 +206,15 @@ export default function RoomList() {
                                  <MoreOutlined className='more-icon' />
                               </Dropdown>
                            </div>
-                           {unreadCount && unreadCount > 0 ? (
-                              <NotReadWrapper>
-                                 <div className='not-read-text'>
-                                    {unreadCount ?? 0}
-                                 </div>
-                              </NotReadWrapper>
-                           ) : null}
+                           <NotReadWrapper>
+                              {unreadCount && unreadCount > 0 ? (
+                                 <NotReadContent>
+                                    <div className='not-read-text'>
+                                       {unreadCount ?? 0}
+                                    </div>
+                                 </NotReadContent>
+                              ) : null}
+                           </NotReadWrapper>
                         </LinkStyled>
                      );
                   })}
@@ -284,13 +286,15 @@ export default function RoomList() {
                                     <MoreOutlined className='more-icon' />
                                  </Dropdown>
                               </div>
-                              {unreadCount && unreadCount > 0 ? (
-                                 <NotReadWrapper>
-                                    <div className='not-read-text'>
-                                       {unreadCount ?? 0}
-                                    </div>
-                                 </NotReadWrapper>
-                              ) : null}
+                              <NotReadWrapper>
+                                 {unreadCount && unreadCount > 0 ? (
+                                    <NotReadContent>
+                                       <div className='not-read-text'>
+                                          {unreadCount ?? 0}
+                                       </div>
+                                    </NotReadContent>
+                                 ) : null}
+                              </NotReadWrapper>
                            </LinkStyled>
                         </div>
                      );
@@ -431,6 +435,15 @@ const FilterButton = styled(Button)`
 const NotReadWrapper = styled.div`
    width: 18px;
    height: 18px;
+   margin-inline: 4px 2px;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+`;
+
+const NotReadContent = styled.div`
+   width: 18px;
+   height: 18px;
    background-color: #fc2727;
    text-align: center;
    border-radius: 50%;
@@ -440,6 +453,7 @@ const NotReadWrapper = styled.div`
       text-align: center;
       font-size: 11px;
       color: #fff;
+      width: 18px;
    }
 `;
 

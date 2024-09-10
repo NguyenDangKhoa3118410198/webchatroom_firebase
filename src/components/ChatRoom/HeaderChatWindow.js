@@ -27,19 +27,27 @@ export const HeaderChatWindow = ({
             {selectedRoomPrivate.id && (
                <HeaderContent>
                   <div className='header__wrapper'>
-                     {otherMember?.displayName ? (
-                        <Avatar
-                           src={otherMember?.photoURL}
-                           alt='error'
-                           size={34}
-                        />
-                     ) : (
-                        <Avatar icon={<UserOutlined />} size={34} alt='Error' />
-                     )}
+                     {otherMember.map((member, index) => (
+                        <div key={index}>
+                           {member?.displayName ? (
+                              <Avatar
+                                 src={member?.photoURL}
+                                 alt='error'
+                                 size={34}
+                              />
+                           ) : (
+                              <Avatar
+                                 icon={<UserOutlined />}
+                                 size={34}
+                                 alt='Error'
+                              />
+                           )}
 
-                     <span className='header__title'>
-                        {otherMember?.displayName ?? 'Anonymous'}
-                     </span>
+                           <span className='header__title'>
+                              {member?.displayName ?? 'Anonymous'}
+                           </span>
+                        </div>
+                     ))}
                   </div>
                   <div
                      className='header-detail'
@@ -50,12 +58,18 @@ export const HeaderChatWindow = ({
                </HeaderContent>
             )}
             {selectedRoom.id && (
-               <>
+               <HeaderContent>
                   <p className='header__title'> {selectedRoom.name}</p>
                   <span className='header__description'>
                      {selectedRoom?.description}
                   </span>
-               </>
+                  <div
+                     className='header-detail'
+                     onClick={() => setShowDetail((prevState) => !prevState)}
+                  >
+                     <EllipsisOutlined style={{ fontSize: '24px' }} />
+                  </div>
+               </HeaderContent>
             )}
          </div>
          {selectedRoom.id && (

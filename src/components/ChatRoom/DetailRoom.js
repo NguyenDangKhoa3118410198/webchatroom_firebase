@@ -4,7 +4,7 @@ import {
    UpOutlined,
    UserOutlined,
 } from '@ant-design/icons';
-import { Avatar, Image } from 'antd';
+import { Avatar, Image, Tooltip } from 'antd';
 import { orderBy } from 'lodash';
 import React, { useState } from 'react';
 import styled from 'styled-components';
@@ -25,7 +25,6 @@ export const DetailRoom = ({ setShowDetail, otherMember, messages }) => {
          }))
    );
    const sortedImages = orderBy(listImages, ['createdAt'], ['desc']);
-
    return (
       <DetailWrapperStyled>
          <>
@@ -34,19 +33,43 @@ export const DetailRoom = ({ setShowDetail, otherMember, messages }) => {
             </div>
             <div className='detail-wrapper'>
                <div className='detail-header'>
-                  {otherMember?.displayName ? (
-                     <Avatar
-                        src={otherMember?.photoURL}
-                        alt='error'
-                        size={55}
-                     />
+                  {otherMember.length > 1 ? (
+                     <Avatar.Group size={40} maxCount={2}>
+                        {otherMember.map((member) => (
+                           <Tooltip title={member.displayName} key={member.uid}>
+                              <Avatar src={member.photoURL} key={member.uid}>
+                                 {member.photoURL
+                                    ? ''
+                                    : member.displayName
+                                         ?.charAt(0)
+                                         ?.toUpperCase()}
+                              </Avatar>
+                           </Tooltip>
+                        ))}
+                     </Avatar.Group>
                   ) : (
-                     <Avatar icon={<UserOutlined />} size={55} alt='Error' />
-                  )}
+                     otherMember.map((member, index) => (
+                        <div key={index}>
+                           {member?.displayName ? (
+                              <Avatar
+                                 src={member?.photoURL}
+                                 alt='error'
+                                 size={55}
+                              />
+                           ) : (
+                              <Avatar
+                                 icon={<UserOutlined />}
+                                 size={55}
+                                 alt='Error'
+                              />
+                           )}
 
-                  <p className='detail-name'>
-                     {otherMember?.displayName ?? 'Anonymous'}
-                  </p>
+                           <p className='detail-name'>
+                              {member?.displayName ?? 'Anonymous'}
+                           </p>
+                        </div>
+                     ))
+                  )}
                </div>
                <div className='detail-content'>
                   <ListImages>
@@ -79,6 +102,35 @@ export const DetailRoom = ({ setShowDetail, otherMember, messages }) => {
                            ))}
                         </div>
                      )}
+
+                     <TitleListImages>
+                        <span className='title-list-images'>All files</span>
+                        <div
+                           style={{
+                              marginLeft: 'auto',
+                           }}
+                        >
+                           {showImages ? (
+                              <UpOutlined style={{ fontSize: '12px' }} />
+                           ) : (
+                              <DownOutlined style={{ fontSize: '12px' }} />
+                           )}
+                        </div>
+                     </TitleListImages>
+                     <TitleListImages>
+                        <span className='title-list-images'>All audio</span>
+                        <div
+                           style={{
+                              marginLeft: 'auto',
+                           }}
+                        >
+                           {showImages ? (
+                              <UpOutlined style={{ fontSize: '12px' }} />
+                           ) : (
+                              <DownOutlined style={{ fontSize: '12px' }} />
+                           )}
+                        </div>
+                     </TitleListImages>
                   </ListImages>
                </div>
             </div>
@@ -161,6 +213,7 @@ const ListImages = styled.div`
       justify-items: center;
       align-items: center;
       overflow-y: auto;
+      margin: 14px;
    }
 
    .image {

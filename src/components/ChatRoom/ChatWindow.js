@@ -1,5 +1,5 @@
 import {
-   AudioOutlined,
+   CloseCircleOutlined,
    DownOutlined,
    PaperClipOutlined,
    SendOutlined,
@@ -34,6 +34,7 @@ import { db } from '../firebase/config';
 import { ReactComponent as WaittingChat } from '../../imgs/waitting-chat.svg';
 import { HeaderChatWindow } from './HeaderChatWindow';
 import { DetailRoom } from './DetailRoom';
+import { VoiceRecoder } from './VoiceRecoder';
 const EmojiPicker = React.lazy(() => import('emoji-picker-react'));
 
 export default function ChatWindow() {
@@ -56,10 +57,15 @@ export default function ChatWindow() {
    const fileInputRef = useRef(null);
    const pickerRef = useRef(null);
    const iconEmoji = useRef(null);
-   const otherMember = memberPrivate.find((o) => o.uid !== uid);
    const [showScrollToBottom, setShowScrollToBottom] = useState(false);
    const chatContainerRef = useRef(null);
    const [showDetail, setShowDetail] = useState(false);
+   const [audioBlob, setAudioBlob] = useState('');
+   const [recording, setRecording] = useState(false);
+   const [audioURL, setAudioURL] = useState('');
+   const otherMember = selectedRoomId.includes('_')
+      ? memberPrivate.filter((o) => o.uid !== uid)
+      : members.filter((o) => o.uid !== uid);
    let lastDate = '';
 
    useEffect(() => {
@@ -111,6 +117,8 @@ export default function ChatWindow() {
       if (container) {
          container.addEventListener('scroll', handleScroll);
       }
+      setAudioBlob('');
+      setRecording(false);
 
       return () => {
          if (container) {
@@ -167,7 +175,7 @@ export default function ChatWindow() {
 
    useEffect(() => {
       scrollToEnd();
-   }, [selectedRoomId, messages]);
+   }, [selectedRoomId, selectedRoom.id, selectedRoomPrivate.id, messages]);
 
    useEffect(() => {
       document.addEventListener('mousedown', handleClickOutside);
@@ -193,8 +201,30 @@ export default function ChatWindow() {
       return seenStatus;
    };
 
+   const uploadAudioToFirebase = async (audioBlob) => {
+      const storage = getStorage();
+      const fileType = audioBlob.type;
+      const fileName = `audio-${Date.now()}.wav`;
+      const storageRef = ref(storage, `audios/${fileName}`);
+
+      try {
+         const snapshot = await uploadBytes(storageRef, audioBlob);
+
+         const downloadURL = await getDownloadURL(snapshot.ref);
+
+         return { downloadURL, fileType, fileName };
+      } catch (error) {
+         console.error('Error uploading audio:', error);
+         throw error;
+      }
+   };
+
    const handleOnSubmit = async () => {
-      if ((!inputValue || !inputValue.trim()) && selectedFiles.length === 0) {
+      if (
+         (!inputValue || !inputValue.trim()) &&
+         selectedFiles.length === 0 &&
+         !audioBlob
+      ) {
          return;
       }
 
@@ -264,7 +294,35 @@ export default function ChatWindow() {
             }
          }
 
-         updateSeenMessages(selectedFiles.length > 0 ? 600 : 0);
+         if (audioBlob) {
+            const audioFileURL = await uploadAudioToFirebase(audioBlob);
+            const messageData = {
+               text: '',
+               uid,
+               photoURL,
+               roomId,
+               displayName,
+               fileURLs: [audioFileURL],
+               createdAt: currentTime,
+               seen: getInitialSeenStatus(seenRoom),
+            };
+
+            await addDocument(messageData, 'messages');
+
+            if (roomId.includes('_')) {
+               await updateDoc(doc(db, 'privateChats', roomId), {
+                  latestMessageTime: currentTime,
+               });
+            } else {
+               await updateDoc(doc(db, 'rooms', roomId), {
+                  latestMessageTime: currentTime,
+               });
+            }
+
+            setAudioBlob('');
+         }
+
+         updateSeenMessages(selectedFiles.length > 0 || audioBlob ? 600 : 0);
       } catch (error) {
          console.error('Error sending message:', error);
          message.error('Error sending message');
@@ -404,7 +462,12 @@ export default function ChatWindow() {
                         </SubFeature>
 
                         <SubFeature>
-                           <AudioOutlined />
+                           <VoiceRecoder
+                              setAudioBlob={setAudioBlob}
+                              setRecording={setRecording}
+                              setAudioURL={setAudioURL}
+                              recording={recording}
+                           />
                         </SubFeature>
 
                         <Form.Item
@@ -413,29 +476,47 @@ export default function ChatWindow() {
                         >
                            <div>
                               {selectedFiles.length > 0 && (
-                                 <Form.Item style={{ margin: '0 5px' }}>
-                                    <div>
-                                       {selectedFiles.map((file, index) => (
-                                          <div key={index + file.name}>
-                                             {file.name}
-                                          </div>
-                                       ))}
-                                    </div>
-                                 </Form.Item>
+                                 <div>
+                                    <Form.Item style={{ margin: '0 5px' }}>
+                                       <div>
+                                          {selectedFiles.map((file, index) => (
+                                             <div key={index + file.name}>
+                                                {file.name}
+                                             </div>
+                                          ))}
+                                       </div>
+                                    </Form.Item>
+                                 </div>
                               )}
-                              <InputStyled
-                                 placeholder='Enter something...'
-                                 autoComplete='off'
-                                 value={inputValue}
-                                 onChange={handleInputChange}
-                                 onPressEnter={handleOnSubmit}
-                              />
-                              <Input
-                                 value={inputValue}
-                                 disabled
-                                 readOnly
-                                 style={{ display: 'none' }}
-                              />
+                              <WrapperInput>
+                                 {audioBlob ? (
+                                    <>
+                                       <StopRecording
+                                          onClick={() => setAudioBlob('')}
+                                       >
+                                          <CloseCircleOutlined
+                                             style={{ color: 'red' }}
+                                          />
+                                       </StopRecording>
+                                       <AudioStyled controls src={audioURL} />
+                                    </>
+                                 ) : (
+                                    <InputStyled
+                                       placeholder='Enter something...'
+                                       autoComplete='off'
+                                       value={inputValue}
+                                       onChange={handleInputChange}
+                                       onPressEnter={handleOnSubmit}
+                                       disabled={recording}
+                                    />
+                                 )}
+                                 <Input
+                                    value={inputValue}
+                                    disabled
+                                    readOnly
+                                    style={{ display: 'none' }}
+                                 />
+                              </WrapperInput>
                            </div>
                         </Form.Item>
 
@@ -531,6 +612,22 @@ const InputStyled = styled(Input)`
    height: 36px;
    background-color: #f3f3f5;
    font-size: 16px;
+`;
+
+const StopRecording = styled.div`
+   margin-inline: 8px;
+   cursor: pointer;
+`;
+
+const AudioStyled = styled.audio`
+   flex: 1;
+   height: 36px;
+`;
+
+const WrapperInput = styled.div`
+   display: flex;
+   justify-content: flex-start;
+   align-items: center;
 `;
 
 const MessageListStyled = styled.div`
