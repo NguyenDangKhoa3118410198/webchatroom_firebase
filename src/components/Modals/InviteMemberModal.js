@@ -3,14 +3,7 @@ import React, { useContext, useMemo, useState } from 'react';
 import { AppContext } from '../Context/AppProvider';
 import { debounce } from 'lodash';
 import { db } from '../firebase/config';
-import {
-   collection,
-   query,
-   where,
-   orderBy,
-   limit,
-   getDocs,
-} from 'firebase/firestore';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import { doc, updateDoc } from 'firebase/firestore';
 
 function DebounceSelect({ fetchOptions, debounceTimeout = 300, ...props }) {
@@ -62,14 +55,26 @@ function DebounceSelect({ fetchOptions, debounceTimeout = 300, ...props }) {
 }
 
 async function fetchUserList(search, curmembers) {
-   const querySnapshot = await getDocs(
+   let querySnapshot;
+
+   const emailQuerySnapshot = await getDocs(
       query(
          collection(db, 'users'),
-         where('keywords', 'array-contains', search),
-         orderBy('displayName'),
-         limit(20)
+         where('email', '>=', search),
+         where('email', '<=', search + '\uf8ff')
       )
    );
+
+   if (emailQuerySnapshot.empty) {
+      querySnapshot = await getDocs(
+         query(
+            collection(db, 'users'),
+            where('keywords', 'array-contains', search)
+         )
+      );
+   } else {
+      querySnapshot = emailQuerySnapshot;
+   }
 
    const userList = querySnapshot.docs
       .map((doc) => ({
