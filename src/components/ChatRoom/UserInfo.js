@@ -26,8 +26,12 @@ export default function UserInfo() {
       useContext(AppContext);
    const [search, setSearch] = useState('');
    const [users, setUsers] = useState([]);
+   const [rooms, setRooms] = useState([]);
    const [loading, setLoading] = useState(false);
-   const debouncedSearchTerm = useDebounce(search, 400);
+   const debouncedSearchTerm = useDebounce(
+      search,
+      search.trim().length > 0 ? 400 : 0
+   );
 
    useEffect(() => {
       const fetchUsers = async () => {
@@ -62,7 +66,20 @@ export default function UserInfo() {
                uid: doc?.data()?.uid,
             }));
 
+            const roomQuerySnapshot = await getDocs(
+               query(
+                  collection(db, 'rooms'),
+                  where('name', '>=', debouncedSearchTerm),
+                  where('name', '<=', debouncedSearchTerm + '\uf8ff')
+               )
+            );
+            const roomList = roomQuerySnapshot.docs.map((doc) => ({
+               label: doc?.data()?.name ?? 'Unknown Room',
+               id: doc?.id,
+            }));
+
             setUsers(userList);
+            setRooms(roomList);
          } catch (error) {
             console.error('Error fetching users:', error);
          } finally {
@@ -74,6 +91,7 @@ export default function UserInfo() {
          fetchUsers();
       } else {
          setUsers([]);
+         setRooms([]);
       }
    }, [debouncedSearchTerm, uid]);
 
@@ -109,47 +127,52 @@ export default function UserInfo() {
       return [user1Id, user2Id].sort().join('_');
    };
 
-   const handleChatPrivate = async (uidSelected) => {
-      const roomId = createRoomId(uidSelected, uid);
+   const handleChat = async (uidSelected, isPrivate = false) => {
+      const roomId = isPrivate ? createRoomId(uidSelected, uid) : uidSelected;
+
       if (!roomId) {
          return;
       }
-      const roomRef = doc(db, 'privateChats', roomId);
 
+      const roomRef = doc(db, isPrivate ? 'privateChats' : 'rooms', roomId);
       try {
          const roomSnapshot = await getDoc(roomRef);
 
+         const currentTime = new Date();
+
          if (roomSnapshot.exists()) {
-            const currentTime = new Date();
-            if (roomId.includes('_')) {
-               await updateDoc(doc(db, 'privateChats', roomId), {
-                  latestMessageTime: currentTime,
-               });
+            if (isPrivate) {
+               await updateDoc(roomRef, { latestMessageTime: currentTime });
                setSelectedRoomId(roomId);
             } else {
-               // await updateDoc(doc(db, 'rooms', roomId), {
-               //    latestMessageTime: currentTime,
-               // });
-               console.log('public');
+               await updateDoc(doc(db, 'rooms', roomId), {
+                  latestMessageTime: currentTime,
+               });
             }
          } else {
             await setDoc(roomRef, {
                members: [uidSelected, uid],
-               createdAt: new Date(),
-               latestMessageTime: new Date(),
+               createdAt: currentTime,
+               latestMessageTime: currentTime,
             });
          }
+
          setSelectedRoomId(roomId);
          setActiveItem(true);
       } catch (error) {
          console.error(
-            'Error checking room existence or creating room: ',
+            'Error checking room existence or creating room:',
             error
          );
       } finally {
          setSearch('');
       }
    };
+
+   const combinedList = [
+      ...users.map((user) => ({ ...user, type: 'user' })),
+      ...rooms.map((room) => ({ ...room, type: 'room' })),
+   ];
 
    const menu = <Menu items={menuItems} />;
 
@@ -179,19 +202,19 @@ export default function UserInfo() {
             loading={loading.toString()}
          />
 
-         {!loading && users.length > 0 && (
+         {!loading && combinedList.length > 0 && (
             <WrapperUserList>
-               {users.map((user) => {
-                  return (
-                     <StyledUser
-                        key={user.uid}
-                        onClick={() => handleChatPrivate(user.uid)}
-                     >
-                        <Avatar size={40} src={user.photoURL} alt='Error' />
-                        {user.label}
-                     </StyledUser>
-                  );
-               })}
+               {combinedList.map((item) => (
+                  <StyledUser
+                     key={item.uid || item.id}
+                     onClick={() =>
+                        handleChat(item.uid || item.id, item.type === 'user')
+                     }
+                  >
+                     <Avatar size={40} src={item.photoURL} alt='Error' />
+                     {item.label}
+                  </StyledUser>
+               ))}
             </WrapperUserList>
          )}
       </WrapperStyled>
@@ -251,7 +274,7 @@ const StyledUser = styled.div`
    align-items: center;
    width: 100%;
    margin: 8px 0;
-   padding: 8px 12px;
+   padding: 4px 12px;
    height: 60px;
    background-color: #f9f9f9;
    border: 1px solid #e0e0e0;

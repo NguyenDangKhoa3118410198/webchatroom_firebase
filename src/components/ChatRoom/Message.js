@@ -56,24 +56,32 @@ export default function Message({
                   <div className='wrapper-message'>
                      <div className='format-message'>
                         <div className='message'>
-                           {isValidURL(text) ? (
-                              <a
-                                 className='text-hyperlink'
-                                 href={text}
-                                 target='_blank'
-                                 rel='noopener noreferrer'
-                              >
-                                 <Typography.Text>{text}</Typography.Text>
-                              </a>
-                           ) : (
-                              <Typography.Text>{text}</Typography.Text>
-                           )}
+                           {text
+                              .split(/(https?:\/\/[^\s]+)/g)
+                              .map((part, index) =>
+                                 isValidURL(part) ? (
+                                    <a
+                                       key={index}
+                                       className='text-hyperlink'
+                                       href={part}
+                                       target='_blank'
+                                       rel='noopener noreferrer'
+                                    >
+                                       <Typography.Text>{part}</Typography.Text>
+                                    </a>
+                                 ) : (
+                                    <Typography.Text key={index}>
+                                       {part}
+                                    </Typography.Text>
+                                 )
+                              )}
                         </div>
                      </div>
                   </div>
                </div>
             </FormatMessage>
          ) : null}
+
          {fileURLs &&
             fileURLs.map((file) => {
                const { downloadURL, fileType, fileName } = file;

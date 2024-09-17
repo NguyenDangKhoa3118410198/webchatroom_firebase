@@ -63,6 +63,7 @@ export default function ChatWindow() {
    const [audioBlob, setAudioBlob] = useState('');
    const [recording, setRecording] = useState(false);
    const [audioURL, setAudioURL] = useState('');
+   const [nofityNewMess, setNotifyNewMess] = useState(false);
    const otherMember = selectedRoomId.includes('_')
       ? memberPrivate.filter((o) => o.uid !== uid)
       : members.filter((o) => o.uid !== uid);
@@ -102,7 +103,7 @@ export default function ChatWindow() {
                container.clientHeight;
 
             if (isScrollPresent) {
-               if (scrollFromBottom > 200) {
+               if (scrollFromBottom > 150) {
                   setShowScrollToBottom(true);
                } else {
                   setShowScrollToBottom(false);
@@ -137,8 +138,6 @@ export default function ChatWindow() {
 
    const updateSeenMessages = useCallback(
       async (timeout = 0) => {
-         scrollToEnd(timeout);
-
          if (selectedRoomId) {
             const q = query(
                collection(db, 'messages'),
@@ -165,6 +164,8 @@ export default function ChatWindow() {
                await batch.commit();
             }
          }
+         scrollToEnd(timeout);
+         setNotifyNewMess(false);
       },
       [selectedRoomId, uid]
    );
@@ -174,8 +175,8 @@ export default function ChatWindow() {
    }, [selectedRoomId, updateSeenMessages]);
 
    useEffect(() => {
-      scrollToEnd();
-   }, [selectedRoomId, selectedRoom.id, selectedRoomPrivate.id, messages]);
+      scrollToEnd(400);
+   }, [selectedRoomId, selectedRoom.id, selectedRoomPrivate.id]);
 
    useEffect(() => {
       document.addEventListener('mousedown', handleClickOutside);
@@ -406,6 +407,14 @@ export default function ChatWindow() {
                      setShowDetail={setShowDetail}
                   />
                   <ContentStyled style={{ position: 'relative' }}>
+                     {nofityNewMess && (
+                        <ButtonNotifyNewMess
+                           shape='round'
+                           onClick={updateSeenMessages}
+                        >
+                           You have a new message <DownOutlined />
+                        </ButtonNotifyNewMess>
+                     )}
                      {showScrollToBottom && (
                         <ButtonScroll
                            onClick={updateSeenMessages}
@@ -423,11 +432,19 @@ export default function ChatWindow() {
                               messageDate !== lastDate && lastDate !== '';
 
                            lastDate = messageDate;
+                           if (
+                              message.seen &&
+                              message.seen[uid] === false &&
+                              !nofityNewMess
+                           ) {
+                              setNotifyNewMess(true);
+                           }
                            return (
                               <React.Fragment key={message.id}>
                                  {showDivider && (
                                     <DividerStyled
                                        key={`divider-${message.id}`}
+                                       visible={showDivider}
                                     >
                                        {messageDate}
                                     </DividerStyled>
@@ -635,20 +652,24 @@ const MessageListStyled = styled.div`
 `;
 
 const DividerStyled = styled.div`
-   margin: 20px 0;
+   margin: 20px 30px;
    text-align: center;
    color: #999;
    font-size: 14px;
    position: relative;
+   opacity: ${(props) => (props.visible ? 1 : 0)};
+   transition: opacity 0.3s ease-in-out;
 
    &::before,
    &::after {
       content: '';
       position: absolute;
       top: 50%;
-      width: 45%;
+      width: 42%;
       height: 1px;
       background-color: #ccc;
+      transition: opacity 0.3s ease-in-out;
+      opacity: ${(props) => (props.visible ? 1 : 0)};
    }
 
    &::before {
@@ -696,6 +717,14 @@ const PopupEmoji = styled.div`
 const ButtonScroll = styled(Button)`
    position: absolute;
    bottom: 10%;
+   left: 50%;
+   transform: translateX(-50%);
+   z-index: 100;
+`;
+
+const ButtonNotifyNewMess = styled(Button)`
+   position: absolute;
+   top: 0;
    left: 50%;
    transform: translateX(-50%);
    z-index: 100;
