@@ -1,30 +1,64 @@
 import {
    ArrowLeftOutlined,
-   DownOutlined,
-   UpOutlined,
+   FileOutlined,
+   LinkOutlined,
+   PictureOutlined,
    UserOutlined,
 } from '@ant-design/icons';
-import { Avatar, Image, Tooltip } from 'antd';
+import { Avatar, Button, Image, Tooltip, Typography } from 'antd';
 import { orderBy } from 'lodash';
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { getIconFile } from '../../utils';
 
 export const DetailRoom = ({ setShowDetail, otherMember, messages }) => {
-   const [showImages, setShowImages] = useState(false);
+   const [filterItem, setFilterItem] = useState('');
 
-   const messagesWithFiles = messages.filter((message) => message.fileURLs);
+   const { images, files, links } = messages.reduce(
+      (acc, message) => {
+         const createdAt = message.createdAt
+            ? message.createdAt.toDate()
+            : new Date();
 
-   const listImages = messagesWithFiles.flatMap((message) =>
-      message.fileURLs
-         .filter((file) => file.fileType.startsWith('image'))
-         .map((file) => ({
-            ...file,
-            createdAt: message.createdAt
-               ? message.createdAt.toDate()
-               : new Date(),
-         }))
+         if (message.fileURLs && Array.isArray(message.fileURLs)) {
+            message.fileURLs.forEach((file) => {
+               const fileData = { ...file, createdAt };
+
+               if (file.fileType.startsWith('image')) {
+                  acc.images.push(fileData);
+               } else if (
+                  file.fileType.startsWith('application/') ||
+                  file.fileType.startsWith('text/')
+               ) {
+                  acc.files.push(fileData);
+               }
+            });
+         }
+
+         if (message.text && typeof message.text === 'string') {
+            const linksInText = message.text.match(/https?:\/\/[^\s]+/g);
+            if (linksInText) {
+               linksInText.forEach((url) => {
+                  acc.links.push({ url, createdAt });
+               });
+            }
+         }
+
+         return acc;
+      },
+      { images: [], files: [], links: [] }
    );
-   const sortedImages = orderBy(listImages, ['createdAt'], ['desc']);
+
+   const sortedImages = orderBy(images, ['createdAt'], ['desc']);
+   const sortedFiles = orderBy(files, ['createdAt'], ['desc']);
+   const sortedLinks = orderBy(links, ['createdAt'], ['desc']);
+
+   console.log(sortedLinks);
+
+   const handleFilterChange = (filter) => {
+      setFilterItem(filter);
+   };
+
    return (
       <DetailWrapperStyled>
          <>
@@ -73,24 +107,24 @@ export const DetailRoom = ({ setShowDetail, otherMember, messages }) => {
                </div>
                <div className='detail-content'>
                   <ListImages>
-                     <TitleListImages
-                        onClick={() => setShowImages((pre) => !pre)}
-                     >
-                        <span className='title-list-images'>All images</span>
-                        <div
-                           style={{
-                              marginLeft: 'auto',
-                           }}
+                     <WrapperFilter>
+                        <ItemFilter
+                           onClick={() => handleFilterChange('images')}
                         >
-                           {showImages ? (
-                              <UpOutlined style={{ fontSize: '12px' }} />
-                           ) : (
-                              <DownOutlined style={{ fontSize: '12px' }} />
-                           )}
-                        </div>
-                     </TitleListImages>
+                           <PictureOutlined />
+                           Images
+                        </ItemFilter>
+                        <ItemFilter onClick={() => handleFilterChange('files')}>
+                           <FileOutlined />
+                           Files
+                        </ItemFilter>
+                        <ItemFilter onClick={() => handleFilterChange('links')}>
+                           <LinkOutlined />
+                           Link
+                        </ItemFilter>
+                     </WrapperFilter>
 
-                     {showImages && sortedImages.length > 0 && (
+                     {filterItem === 'images' && sortedImages.length > 0 && (
                         <div className='sort-images'>
                            {sortedImages.map((item, index) => (
                               <Image
@@ -103,34 +137,39 @@ export const DetailRoom = ({ setShowDetail, otherMember, messages }) => {
                         </div>
                      )}
 
-                     <TitleListImages>
-                        <span className='title-list-images'>All files</span>
-                        <div
-                           style={{
-                              marginLeft: 'auto',
-                           }}
-                        >
-                           {showImages ? (
-                              <UpOutlined style={{ fontSize: '12px' }} />
-                           ) : (
-                              <DownOutlined style={{ fontSize: '12px' }} />
-                           )}
+                     {filterItem === 'files' && sortedFiles.length > 0 && (
+                        <div style={{ height: '500px', overflow: 'auto' }}>
+                           {sortedFiles.map((item) => (
+                              <FileLink
+                                 href={item.downloadURL}
+                                 download={item.fileName}
+                                 target='_blank'
+                                 rel='noopener noreferrer'
+                              >
+                                 {getIconFile(item.fileType)}
+                                 <span className='file-name'>
+                                    {item.fileName}
+                                 </span>
+                              </FileLink>
+                           ))}
                         </div>
-                     </TitleListImages>
-                     <TitleListImages>
-                        <span className='title-list-images'>All audio</span>
-                        <div
-                           style={{
-                              marginLeft: 'auto',
-                           }}
-                        >
-                           {showImages ? (
-                              <UpOutlined style={{ fontSize: '12px' }} />
-                           ) : (
-                              <DownOutlined style={{ fontSize: '12px' }} />
-                           )}
+                     )}
+
+                     {filterItem === 'links' && sortedLinks.length > 0 && (
+                        <div style={{ height: '500px', overflow: 'auto' }}>
+                           {sortedLinks.map((item, index) => (
+                              <ItemLink
+                                 key={index}
+                                 className='text-hyperlink'
+                                 href={item.url}
+                                 target='_blank'
+                                 rel='noopener noreferrer'
+                              >
+                                 <Typography.Text>{item.url}</Typography.Text>
+                              </ItemLink>
+                           ))}
                         </div>
-                     </TitleListImages>
+                     )}
                   </ListImages>
                </div>
             </div>
@@ -185,27 +224,14 @@ const DetailWrapperStyled = styled.div`
    }
 `;
 
-const TitleListImages = styled.div`
-   display: flex;
-   align-items: center;
-   margin: 15px 0;
-   cursor: pointer;
-`;
-
 const ListImages = styled.div`
    display: block;
    padding: 4px;
    margin: 4px;
    border-radius: 20px;
 
-   .title-list-images {
-      font-size: 15px;
-      font-weight: 600;
-      margin-left: 8px;
-   }
-
    .sort-images {
-      height: 400px;
+      height: 500px;
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
       grid-auto-rows: 100px;
@@ -222,3 +248,59 @@ const ListImages = styled.div`
       object-fit: cover;
    }
 `;
+
+const WrapperFilter = styled.div`
+   display: flex;
+   gap: 4px;
+   justify-content: flex-start;
+   padding: 4px;
+   overflow-x: auto;
+   overflow-y: hidden;
+   cursor: grab;
+
+   &::-webkit-scrollbar {
+      display: none;
+   }
+
+   scrollbar-width: auto;
+   -ms-overflow-style: auto;
+`;
+
+const ItemFilter = styled(Button)`
+   border-radius: 40px;
+   padding: 4px 8px;
+   margin: 5px 8px;
+   border: 1px solid var(--color-black);
+   font-weight: 500;
+   font-size: 14px;
+   display: flex;
+   align-items: center;
+   cursor: pointer;
+`;
+
+const FileLink = styled.a`
+   display: flex;
+   align-items: center;
+   text-decoration: none;
+   color: inherit;
+   margin: 5px;
+   padding: 15px;
+   background-color: #f0f0f0;
+   border-radius: 14px;
+   gap: 5px;
+
+   .file-name {
+      overflow-wrap: break-word;
+      word-break: break-word;
+   }
+`;
+
+const ItemLink = styled.a`
+   margin: 8px;
+   padding: 15px;
+   border-radius: 14px;
+   display: inline-block;
+   background-color: #f0f0f0;
+`;
+
+export default DetailRoom;

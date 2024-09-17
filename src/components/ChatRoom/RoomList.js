@@ -412,7 +412,6 @@ const FilterStatus = styled.div`
    }
 
    scrollbar-width: none;
-
    -ms-overflow-style: none;
 `;
 
