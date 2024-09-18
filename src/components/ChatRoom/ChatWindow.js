@@ -1,5 +1,6 @@
 import {
    CloseCircleOutlined,
+   DeleteOutlined,
    DownOutlined,
    PaperClipOutlined,
    SendOutlined,
@@ -120,6 +121,7 @@ export default function ChatWindow() {
       }
       setAudioBlob('');
       setRecording(false);
+      setSelectedFiles([]);
 
       return () => {
          if (container) {
@@ -394,6 +396,12 @@ export default function ChatWindow() {
       setOpenEmoji((prevValue) => !prevValue);
    };
 
+   const handleRemove = (file) => {
+      setSelectedFiles((prevFiles) =>
+         prevFiles.filter((item) => item.name !== file.name)
+      );
+   };
+
    return (
       <>
          <WrapperStyled
@@ -450,7 +458,7 @@ export default function ChatWindow() {
                                  {showDivider && (
                                     <DividerStyled
                                        key={`divider-${message.id}`}
-                                       visible={showDivider}
+                                       visible={showDivider ? 1 : 0}
                                     >
                                        {messageDate}
                                     </DividerStyled>
@@ -501,13 +509,36 @@ export default function ChatWindow() {
                               {selectedFiles.length > 0 && (
                                  <div>
                                     <Form.Item style={{ margin: '0 5px' }}>
-                                       <div>
-                                          {selectedFiles.map((file, index) => (
-                                             <div key={index + file.name}>
-                                                {file.name}
-                                             </div>
-                                          ))}
-                                       </div>
+                                       <WrapperTotalSelected>
+                                          <span>{`Selected files: ${selectedFiles.length}`}</span>
+                                          <span
+                                             className='delete-all'
+                                             onClick={() =>
+                                                setSelectedFiles([])
+                                             }
+                                          >
+                                             Delete All
+                                          </span>
+                                       </WrapperTotalSelected>
+                                       <WrapperListSelectedFiles>
+                                          {selectedFiles.map((file) => {
+                                             return (
+                                                <ItemSelectedFile
+                                                   key={file.uid}
+                                                >
+                                                   <span className='item-name'>
+                                                      {file.name}
+                                                   </span>
+                                                   <DeleteOutlined
+                                                      className='item-delete'
+                                                      onClick={() =>
+                                                         handleRemove(file)
+                                                      }
+                                                   />
+                                                </ItemSelectedFile>
+                                             );
+                                          })}
+                                       </WrapperListSelectedFiles>
                                     </Form.Item>
                                  </div>
                               )}
@@ -734,4 +765,34 @@ const ButtonNotifyNewMess = styled(Button)`
    left: 50%;
    transform: translateX(-50%);
    z-index: 100;
+`;
+
+const WrapperListSelectedFiles = styled.div`
+   max-height: 100px;
+   overflow: auto;
+`;
+
+const ItemSelectedFile = styled.div`
+   display: flex;
+   align-items: center;
+   margin-bottom: 8px;
+
+   .item-name {
+      flex: 1;
+   }
+
+   .item-delete {
+      cursor: pointer;
+      color: red;
+   }
+`;
+
+const WrapperTotalSelected = styled.div`
+   display: flex;
+
+   .delete-all {
+      margin-left: auto;
+      color: red;
+      cursor: pointer;
+   }
 `;
