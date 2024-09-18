@@ -343,9 +343,15 @@ export default function ChatWindow() {
       const fileUploadPromises = files.map(async (file) => {
          try {
             const fileType = file.type;
+            const isTextFile = fileType.startsWith('text/');
+            const metadata = {
+               contentType: isTextFile ? 'application/octet-stream' : fileType,
+            };
+
             const storageRef = ref(storage, `${fileType}s/${file.name}`);
 
-            const snapshot = await uploadBytes(storageRef, file);
+            const snapshot = await uploadBytes(storageRef, file, metadata);
+
             const downloadURL = await getDownloadURL(snapshot.ref);
 
             return { downloadURL, fileType, fileName: file.name };
