@@ -1,5 +1,6 @@
 import { AudioMutedOutlined, AudioOutlined } from '@ant-design/icons';
 import React, { useRef } from 'react';
+import styled, { css, keyframes } from 'styled-components';
 
 export const VoiceRecoder = ({
    setAudioBlob,
@@ -28,19 +29,38 @@ export const VoiceRecoder = ({
    };
 
    return (
-      <div
+      <WrapperIcon
          onClick={recording ? stopRecording : startRecording}
-         style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-         }}
+         recording={recording}
       >
          {recording ? (
             <AudioMutedOutlined style={{ color: 'red' }} />
          ) : (
             <AudioOutlined />
          )}
-      </div>
+      </WrapperIcon>
    );
 };
+
+const blink = keyframes`
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+`;
+
+const WrapperIcon = styled.div`
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   ${(props) =>
+      props.recording &&
+      css`
+         animation: ${blink} 1s infinite;
+      `}
+`;

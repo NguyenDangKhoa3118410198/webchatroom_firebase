@@ -614,7 +614,11 @@ export default function ChatWindow() {
                                           </>
                                        ) : (
                                           <InputStyled
-                                             placeholder='Enter something...'
+                                             placeholder={
+                                                recording
+                                                   ? 'Recording'
+                                                   : 'Enter something...'
+                                             }
                                              autoComplete='off'
                                              value={inputValue}
                                              onChange={handleInputChange}
