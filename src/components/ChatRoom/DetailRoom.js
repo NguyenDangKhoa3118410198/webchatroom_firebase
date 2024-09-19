@@ -270,12 +270,14 @@ const ItemFilter = styled(Button)`
    border-radius: 40px;
    padding: 4px 8px;
    margin: 5px 8px;
-   border: 1px solid var(--color-black);
+   border: 1px solid #f0f2f7;
    font-weight: 500;
    font-size: 14px;
    display: flex;
    align-items: center;
    cursor: pointer;
+   background-color: #fff;
+   color: #a3cbf8;
 `;
 
 const FileLink = styled.a`

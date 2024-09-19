@@ -5,8 +5,9 @@ import {
    PaperClipOutlined,
    SendOutlined,
    SmileOutlined,
+   UploadOutlined,
 } from '@ant-design/icons';
-import { Button, Form, Input, message } from 'antd';
+import { Button, Form, Input, message, Upload } from 'antd';
 import React, {
    useContext,
    useState,
@@ -402,6 +403,40 @@ export default function ChatWindow() {
       );
    };
 
+   const handleDraggerChange = (info) => {
+      const newFiles = info.fileList
+         .map((fileWrapper) => fileWrapper.originFileObj)
+         .filter((file) => !!file);
+
+      setSelectedFiles((prevFiles) => {
+         const nonDuplicateFiles = newFiles.filter(
+            (newFile) =>
+               !prevFiles.some((prevFile) => prevFile.name === newFile.name)
+         );
+
+         return [...prevFiles, ...nonDuplicateFiles];
+      });
+   };
+
+   const handleFileChange = (e) => {
+      const newFiles = Array.from(e.target.files);
+
+      const updatedFiles = [...selectedFiles];
+
+      newFiles.forEach((newFile) => {
+         const isDuplicate = updatedFiles.some(
+            (file) =>
+               file.name === newFile.name &&
+               file.lastModified === newFile.lastModified
+         );
+         if (!isDuplicate) {
+            updatedFiles.push(newFile);
+         }
+      });
+
+      setSelectedFiles(updatedFiles);
+   };
+
    return (
       <>
          <WrapperStyled
@@ -479,36 +514,29 @@ export default function ChatWindow() {
                      </MessageListStyled>
 
                      <FormStyled form={form}>
-                        <input
-                           ref={fileInputRef}
-                           type='file'
-                           multiple
-                           onChange={(e) =>
-                              setSelectedFiles(Array.from(e.target.files))
-                           }
-                           style={{ display: 'none' }}
-                        />
-                        <SubFeature onClick={handleUpload}>
-                           <PaperClipOutlined />
-                        </SubFeature>
-
-                        <SubFeature>
-                           <VoiceRecoder
-                              setAudioBlob={setAudioBlob}
-                              setRecording={setRecording}
-                              setAudioURL={setAudioURL}
-                              recording={recording}
-                           />
-                        </SubFeature>
-
-                        <Form.Item
-                           name='message'
-                           style={{ flex: 1, margin: '0 5px' }}
-                        >
-                           <div>
-                              {selectedFiles.length > 0 && (
-                                 <div>
-                                    <Form.Item style={{ margin: '0 5px' }}>
+                        <WrapperForm>
+                           {selectedFiles.length > 0 && (
+                              <WrapperTopInput>
+                                 <Upload.Dragger
+                                    onChange={handleDraggerChange}
+                                    fileList={selectedFiles}
+                                    multiple
+                                    autoUpload={false}
+                                    beforeUpload={() => false}
+                                    showUploadList={false}
+                                    className='space-dragger-upload'
+                                 >
+                                    <p className='ant-upload-drag-icon'>
+                                       <UploadOutlined />
+                                    </p>
+                                 </Upload.Dragger>
+                                 <WrapperRightDragger>
+                                    <Form.Item
+                                       style={{
+                                          margin: '0 5px',
+                                          width: '100%',
+                                       }}
+                                    >
                                        <WrapperTotalSelected>
                                           <span>{`Selected files: ${selectedFiles.length}`}</span>
                                           <span
@@ -540,71 +568,103 @@ export default function ChatWindow() {
                                           })}
                                        </WrapperListSelectedFiles>
                                     </Form.Item>
-                                 </div>
-                              )}
-                              <WrapperInput>
-                                 {audioBlob ? (
-                                    <>
-                                       <StopRecording
-                                          onClick={() => setAudioBlob('')}
-                                       >
-                                          <CloseCircleOutlined
-                                             style={{ color: 'red' }}
-                                          />
-                                       </StopRecording>
-                                       <AudioStyled controls src={audioURL} />
-                                    </>
-                                 ) : (
-                                    <InputStyled
-                                       placeholder='Enter something...'
-                                       autoComplete='off'
-                                       value={inputValue}
-                                       onChange={handleInputChange}
-                                       onPressEnter={handleOnSubmit}
-                                       disabled={recording}
-                                    />
-                                 )}
-                                 <Input
-                                    value={inputValue}
-                                    disabled
-                                    readOnly
-                                    style={{ display: 'none' }}
-                                 />
-                              </WrapperInput>
-                           </div>
-                        </Form.Item>
+                                 </WrapperRightDragger>
+                              </WrapperTopInput>
+                           )}
+                           <WrapperBottomInput>
+                              <input
+                                 ref={fileInputRef}
+                                 type='file'
+                                 multiple
+                                 onChange={(e) => handleFileChange(e)}
+                                 style={{ display: 'none' }}
+                              />
+                              <SubFeature onClick={handleUpload}>
+                                 <PaperClipOutlined />
+                              </SubFeature>
 
-                        <div style={{ position: 'relative' }}>
-                           <SubFeature
-                              onClick={handleEmojiOpen}
-                              ref={iconEmoji}
-                           >
-                              <SmileOutlined />
-                           </SubFeature>
-                           <PopupEmoji>
-                              <div
-                                 style={{
-                                    position: 'absolute',
-                                    bottom: '50px',
-                                    right: 0,
-                                 }}
-                                 ref={pickerRef}
+                              <SubFeature>
+                                 <VoiceRecoder
+                                    setAudioBlob={setAudioBlob}
+                                    setRecording={setRecording}
+                                    setAudioURL={setAudioURL}
+                                    recording={recording}
+                                 />
+                              </SubFeature>
+
+                              <Form.Item
+                                 name='message'
+                                 style={{ flex: 1, margin: '0 5px' }}
                               >
-                                 <EmojiPicker
-                                    open={openEmoji}
-                                    onEmojiClick={handleEmojiSelect}
-                                 />
-                              </div>
-                           </PopupEmoji>
-                        </div>
+                                 <div>
+                                    <WrapperInput>
+                                       {audioBlob ? (
+                                          <>
+                                             <StopRecording
+                                                onClick={() => setAudioBlob('')}
+                                             >
+                                                <CloseCircleOutlined
+                                                   style={{ color: 'red' }}
+                                                />
+                                             </StopRecording>
+                                             <AudioStyled
+                                                controls
+                                                src={audioURL}
+                                             />
+                                          </>
+                                       ) : (
+                                          <InputStyled
+                                             placeholder='Enter something...'
+                                             autoComplete='off'
+                                             value={inputValue}
+                                             onChange={handleInputChange}
+                                             onPressEnter={handleOnSubmit}
+                                             disabled={recording}
+                                          />
+                                       )}
+                                       <Input
+                                          value={inputValue}
+                                          disabled
+                                          readOnly
+                                          style={{ display: 'none' }}
+                                       />
+                                    </WrapperInput>
+                                 </div>
+                              </Form.Item>
 
-                        <Button
-                           type='primary'
-                           onClick={handleOnSubmit}
-                           style={{ marginBottom: '4px' }}
-                        >
-                           <SendOutlined />
-                        </Button>
+                              <div style={{ position: 'relative' }}>
+                                 <SubFeature
+                                    onClick={handleEmojiOpen}
+                                    ref={iconEmoji}
+                                 >
+                                    <SmileOutlined />
+                                 </SubFeature>
+                                 <PopupEmoji>
+                                    <div
+                                       style={{
+                                          position: 'absolute',
+                                          bottom: '50px',
+                                          right: 0,
+                                       }}
+                                       ref={pickerRef}
+                                    >
+                                       <EmojiPicker
+                                          open={openEmoji}
+                                          onEmojiClick={handleEmojiSelect}
+                                       />
+                                    </div>
+                                 </PopupEmoji>
+                              </div>
+
+                              <Button
+                                 type='primary'
+                                 onClick={handleOnSubmit}
+                                 style={{ marginBottom: '4px' }}
+                              >
+                                 <SendOutlined />
+                              </Button>
+                           </WrapperBottomInput>
+                        </WrapperForm>
                      </FormStyled>
                   </ContentStyled>
                </>
@@ -779,11 +839,22 @@ const ItemSelectedFile = styled.div`
 
    .item-name {
       flex: 1;
+      display: inline-block;
+      max-width: calc(100% - 25px);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
    }
 
    .item-delete {
+      margin-left: 5px;
+      width: 20px;
       cursor: pointer;
       color: red;
+   }
+
+   &:hover {
+      background-color: #e0e0e0;
    }
 `;
 
@@ -795,4 +866,37 @@ const WrapperTotalSelected = styled.div`
       color: red;
       cursor: pointer;
    }
+`;
+
+const WrapperForm = styled.div`
+   display: flex;
+   flex-direction: column;
+   width: 100%;
+`;
+
+const WrapperBottomInput = styled.div`
+   display: flex;
+`;
+
+const WrapperTopInput = styled.div`
+   display: flex;
+   width: 100%;
+   margin-bottom: 10px;
+
+   .space-dragger-upload {
+      padding: 10;
+      flex: 1;
+      min-width: 100px;
+   }
+
+   @media (max-width: 425px) {
+      .space-dragger-upload {
+         display: none;
+      }
+   }
+`;
+
+const WrapperRightDragger = styled.div`
+   padding: 5px 10px;
+   flex: 1;
 `;
