@@ -63,3 +63,10 @@ export const getIconFile = (fileType) => {
          return <FileOutlined style={{ fontSize: '24px', color: '#616161' }} />;
    }
 };
+
+export const formatDate = (seconds) => {
+   if (!seconds) return '';
+
+   const date = new Date(seconds * 1000);
+   return date.toISOString().split('T')[0];
+};

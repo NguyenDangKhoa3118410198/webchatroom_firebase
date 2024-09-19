@@ -2,9 +2,7 @@ import {
    CloseCircleOutlined,
    DeleteOutlined,
    DownOutlined,
-   PaperClipOutlined,
    SendOutlined,
-   SmileOutlined,
    UploadOutlined,
 } from '@ant-design/icons';
 import { Button, Form, Input, message, Upload } from 'antd';
@@ -17,7 +15,6 @@ import React, {
    useCallback,
 } from 'react';
 import styled from 'styled-components';
-import Message from './Message';
 import { AppContext } from '../Context/AppProvider';
 import { addDocument } from '../firebase/services';
 import { AuthContext } from '../Context/AuthProvider';
@@ -36,8 +33,8 @@ import { db } from '../firebase/config';
 import { ReactComponent as WaittingChat } from '../../imgs/waitting-chat.svg';
 import { HeaderChatWindow } from './HeaderChatWindow';
 import { DetailRoom } from './DetailRoom';
-import { VoiceRecoder } from './VoiceRecoder';
-const EmojiPicker = React.lazy(() => import('emoji-picker-react'));
+import { FeaturesInput } from './FeaturesInput';
+import { MessagesList } from './MessagesList';
 
 export default function ChatWindow() {
    const {
@@ -69,7 +66,6 @@ export default function ChatWindow() {
    const otherMember = selectedRoomId.includes('_')
       ? memberPrivate.filter((o) => o.uid !== uid)
       : members.filter((o) => o.uid !== uid);
-   let lastDate = '';
 
    useEffect(() => {
       const preloadEmojiPicker = () => {
@@ -333,13 +329,6 @@ export default function ChatWindow() {
       }
    };
 
-   function formatDate(seconds) {
-      if (!seconds) return '';
-
-      const date = new Date(seconds * 1000);
-      return date.toISOString().split('T')[0];
-   }
-
    const uploadFiles = async (files) => {
       const storage = getStorage();
 
@@ -473,43 +462,13 @@ export default function ChatWindow() {
                         </ButtonScroll>
                      )}
                      <MessageListStyled ref={chatContainerRef}>
-                        {messages.map((message) => {
-                           const messageDate = formatDate(
-                              message?.createdAt?.seconds
-                           );
-                           const showDivider =
-                              messageDate !== lastDate && lastDate !== '';
+                        <MessagesList
+                           messages={messages}
+                           uid={uid}
+                           nofityNewMess={nofityNewMess}
+                           setNotifyNewMess={setNotifyNewMess}
+                        />
 
-                           lastDate = messageDate;
-                           if (
-                              message.seen &&
-                              message.seen[uid] === false &&
-                              !nofityNewMess
-                           ) {
-                              setNotifyNewMess(true);
-                           }
-                           return (
-                              <React.Fragment key={message.id}>
-                                 {showDivider && (
-                                    <DividerStyled
-                                       key={`divider-${message.id}`}
-                                       visible={showDivider ? 1 : 0}
-                                    >
-                                       {messageDate}
-                                    </DividerStyled>
-                                 )}
-                                 <Message
-                                    text={message.text}
-                                    photoURL={message.photoURL}
-                                    displayName={message.displayName}
-                                    createAt={message.createdAt}
-                                    author={message.uid === uid}
-                                    id={message.id}
-                                    fileURLs={message.fileURLs || []}
-                                 />
-                              </React.Fragment>
-                           );
-                        })}
                         <div ref={messagesEndRef} />
                      </MessageListStyled>
 
@@ -579,18 +538,19 @@ export default function ChatWindow() {
                                  onChange={(e) => handleFileChange(e)}
                                  style={{ display: 'none' }}
                               />
-                              <SubFeature onClick={handleUpload}>
-                                 <PaperClipOutlined />
-                              </SubFeature>
 
-                              <SubFeature>
-                                 <VoiceRecoder
-                                    setAudioBlob={setAudioBlob}
-                                    setRecording={setRecording}
-                                    setAudioURL={setAudioURL}
-                                    recording={recording}
-                                 />
-                              </SubFeature>
+                              <FeaturesInput
+                                 handleUpload={handleUpload}
+                                 setAudioBlob={setAudioBlob}
+                                 setRecording={setRecording}
+                                 setAudioURL={setAudioURL}
+                                 recording={recording}
+                                 handleEmojiOpen={handleEmojiOpen}
+                                 openEmoji={openEmoji}
+                                 handleEmojiSelect={handleEmojiSelect}
+                                 pickerRef={pickerRef}
+                                 ref={iconEmoji}
+                              />
 
                               <Form.Item
                                  name='message'
@@ -635,30 +595,6 @@ export default function ChatWindow() {
                                     </WrapperInput>
                                  </div>
                               </Form.Item>
-
-                              <div style={{ position: 'relative' }}>
-                                 <SubFeature
-                                    onClick={handleEmojiOpen}
-                                    ref={iconEmoji}
-                                 >
-                                    <SmileOutlined />
-                                 </SubFeature>
-                                 <PopupEmoji>
-                                    <div
-                                       style={{
-                                          position: 'absolute',
-                                          bottom: '50px',
-                                          right: 0,
-                                       }}
-                                       ref={pickerRef}
-                                    >
-                                       <EmojiPicker
-                                          open={openEmoji}
-                                          onEmojiClick={handleEmojiSelect}
-                                       />
-                                    </div>
-                                 </PopupEmoji>
-                              </div>
 
                               <Button
                                  type='primary'
@@ -752,52 +688,6 @@ const MessageListStyled = styled.div`
    overflow-y: auto;
 `;
 
-const DividerStyled = styled.div`
-   margin: 20px 30px;
-   text-align: center;
-   color: #999;
-   font-size: 14px;
-   position: relative;
-   opacity: ${(props) => (props.visible ? 1 : 0)};
-   transition: opacity 0.3s ease-in-out;
-
-   &::before,
-   &::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      width: 42%;
-      height: 1px;
-      background-color: #ccc;
-      transition: opacity 0.3s ease-in-out;
-      opacity: ${(props) => (props.visible ? 1 : 0)};
-   }
-
-   &::before {
-      left: 0;
-   }
-
-   &::after {
-      right: 0;
-   }
-`;
-
-const SubFeature = styled.div`
-   margin: 5px;
-   padding: 5px;
-   display: inline-flex;
-   align-items: center;
-   justify-content: center;
-   cursor: pointer;
-   font-size: 20px;
-   color: #08c;
-
-   &:hover {
-      background-color: #f0f0f0;
-      border-radius: 50%;
-   }
-`;
-
 const WaittingChatWrapper = styled.div`
    display: flex;
    flex-direction: column;
@@ -809,10 +699,6 @@ const WaittingChatWrapper = styled.div`
 const LabelWaittingChat = styled.h3`
    margin: 5px;
    font-weight: 700;
-`;
-
-const PopupEmoji = styled.div`
-   position: relative;
 `;
 
 const ButtonScroll = styled(Button)`
