@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { Avatar, Button, Dropdown, Menu, Typography } from 'antd';
 import { AppContext } from '../Context/AppProvider';
 import styled from 'styled-components';
@@ -10,7 +10,7 @@ import {
    query,
    where,
 } from 'firebase/firestore';
-import { db } from '../firebase/config';
+import { db, rtdb } from '../firebase/config';
 import { AuthContext } from '../Context/AuthProvider';
 import {
    AppstoreOutlined,
@@ -20,6 +20,8 @@ import {
    TeamOutlined,
 } from '@ant-design/icons';
 import { Modal } from 'antd';
+import { onValue, ref } from 'firebase/database';
+import { CustomBadge } from './Badge';
 
 export default function RoomList() {
    const {
@@ -34,6 +36,37 @@ export default function RoomList() {
    const { confirm } = Modal;
    const [filterStatus, setFilterStatus] = useState('all');
    const [unreadMessagesCount, setUnreadMessagesCount] = useState({});
+   const [statuses, setStatuses] = useState({});
+   const uidsPrivate = useMemo(() => {
+      return roomPrivate.map((o) => o.members.find((id) => id !== uid));
+   }, [roomPrivate, uid]);
+
+   useEffect(() => {
+      const unsubscribes = [];
+
+      uidsPrivate.forEach((otherParticipantId) => {
+         if (otherParticipantId) {
+            const userStatusRef = ref(rtdb, `status/${otherParticipantId}`);
+
+            const unsubscribe = onValue(userStatusRef, (snapshot) => {
+               const statusData = snapshot.val();
+
+               setStatuses((prevStatuses) => ({
+                  ...prevStatuses,
+                  [otherParticipantId]: statusData
+                     ? statusData.state
+                     : 'offline',
+               }));
+            });
+
+            unsubscribes.push(unsubscribe);
+         }
+      });
+
+      return () => {
+         unsubscribes.forEach((unsubscribe) => unsubscribe());
+      };
+   }, [uidsPrivate, uid]);
 
    const showConfirm = () => {
       return new Promise((resolve) => {
@@ -192,9 +225,11 @@ export default function RoomList() {
                               selectedRoomId === room.id ? 'active' : ''
                            }
                         >
-                           <Avatar className='avatar' size={40}>
-                              {avatarText}
-                           </Avatar>
+                           <CustomBadge status={'online'}>
+                              <Avatar className='avatar' size={40}>
+                                 {avatarText}
+                              </Avatar>
+                           </CustomBadge>
                            <span className='name'>{room.name}</span>
                            <div className='more-options'>
                               <Dropdown
@@ -229,6 +264,8 @@ export default function RoomList() {
                         (id) => id !== uid
                      );
                      const otherMember = userDetails[otherParticipantId];
+                     const status = statuses[otherParticipantId] || 'offline';
+
                      const avatarText =
                         otherMember?.displayName?.charAt(0)?.toUpperCase() ||
                         '?';
@@ -262,17 +299,20 @@ export default function RoomList() {
                                  selectedRoomId === item.id ? 'active' : ''
                               }
                            >
-                              {otherMember?.photoURL ? (
-                                 <Avatar
-                                    src={otherMember?.photoURL}
-                                    className='avatar'
-                                    size={40}
-                                 />
-                              ) : (
-                                 <Avatar className='avatar' size={40}>
-                                    {avatarText}
-                                 </Avatar>
-                              )}
+                              <CustomBadge status={status}>
+                                 {otherMember?.photoURL ? (
+                                    <Avatar
+                                       src={otherMember?.photoURL}
+                                       className='avatar'
+                                       size={40}
+                                    />
+                                 ) : (
+                                    <Avatar className='avatar' size={40}>
+                                       {avatarText}
+                                    </Avatar>
+                                 )}
+                              </CustomBadge>
+
                               <span className='name'>
                                  {otherMember?.displayName ?? 'Anonymous'}
                               </span>
@@ -362,7 +402,7 @@ const LinkStyled = styled(Typography.Link)`
 
    .avatar {
       border-radius: 50%;
-      margin-right: 10px;
+      margin-right: 4px;
       background-color: #ccc;
       flex-shrink: 0;
       font-size: 20px;

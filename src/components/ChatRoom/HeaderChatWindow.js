@@ -7,6 +7,8 @@ import {
 import { Avatar, Button, Tooltip } from 'antd';
 import React from 'react';
 import styled from 'styled-components';
+import useGetUserStatus from '../../hooks/useGetUserStatus';
+import { CustomBadge } from './Badge';
 
 export const HeaderChatWindow = ({
    otherMember,
@@ -15,9 +17,9 @@ export const HeaderChatWindow = ({
    members,
    setIsInviteMemberVisible,
    setActiveItem,
-   showDetail,
    setShowDetail,
 }) => {
+   const status = useGetUserStatus(otherMember[0]?.uid);
    return (
       <HeaderStyled>
          <div className='back-mobile' onClick={() => setActiveItem(false)}>
@@ -27,27 +29,29 @@ export const HeaderChatWindow = ({
             {selectedRoomPrivate.id && (
                <HeaderContent>
                   <div className='header__wrapper'>
-                     {otherMember.map((member, index) => (
-                        <div key={index}>
-                           {member?.displayName ? (
-                              <Avatar
-                                 src={member?.photoURL}
-                                 alt='error'
-                                 size={34}
-                              />
-                           ) : (
-                              <Avatar
-                                 icon={<UserOutlined />}
-                                 size={34}
-                                 alt='Error'
-                              />
-                           )}
+                     <CustomBadge status={status} size={25}>
+                        {otherMember.map((member, index) => (
+                           <div key={index}>
+                              {member?.displayName ? (
+                                 <Avatar
+                                    src={member?.photoURL}
+                                    alt='error'
+                                    size={34}
+                                 />
+                              ) : (
+                                 <Avatar
+                                    icon={<UserOutlined />}
+                                    size={34}
+                                    alt='Error'
+                                 />
+                              )}
 
-                           <span className='header__title'>
-                              {member?.displayName ?? 'Anonymous'}
-                           </span>
-                        </div>
-                     ))}
+                              <span className='header__title'>
+                                 {member?.displayName ?? 'Anonymous'}
+                              </span>
+                           </div>
+                        ))}
+                     </CustomBadge>
                   </div>
                   <div
                      className='header-detail'
@@ -139,6 +143,7 @@ const HeaderStyled = styled.div`
          flex-direction: column;
          justify-content: center;
          font-size: 16px;
+         margin-top: 4px;
          width: 100%;
       }
 
