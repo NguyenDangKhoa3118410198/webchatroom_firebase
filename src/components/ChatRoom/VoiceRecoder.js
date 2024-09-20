@@ -31,7 +31,7 @@ export const VoiceRecoder = ({
    return (
       <WrapperIcon
          onClick={recording ? stopRecording : startRecording}
-         recording={recording}
+         recording={recording ? 1 : 0}
       >
          {recording ? (
             <AudioMutedOutlined style={{ color: 'red' }} />

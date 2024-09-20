@@ -2,7 +2,7 @@ import { Avatar, Dropdown, Input, Menu, Typography } from 'antd';
 import { signOut } from 'firebase/auth';
 import React, { useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { auth, db } from '../firebase/config';
+import { auth, db, rtdb } from '../firebase/config';
 
 import { AuthContext } from '../Context/AuthProvider';
 import { MoreOutlined, UserOutlined } from '@ant-design/icons';
@@ -19,6 +19,9 @@ import {
    updateDoc,
    where,
 } from 'firebase/firestore';
+import { ref, set } from 'firebase/database';
+import useGetUserStatus from '../../hooks/useGetUserStatus';
+import { CustomBadge } from './Badge';
 
 export default function UserInfo() {
    const { displayName, photoURL, uid } = useContext(AuthContext);
@@ -32,6 +35,7 @@ export default function UserInfo() {
       search,
       search.trim().length > 0 ? 400 : 0
    );
+   const status = useGetUserStatus(uid);
 
    useEffect(() => {
       const fetchUsers = async () => {
@@ -99,6 +103,27 @@ export default function UserInfo() {
       setAddRoomVisible(true);
    };
 
+   const handleLogout = () => {
+      const user = auth.currentUser;
+
+      if (user) {
+         const userStatusRef = ref(rtdb, `status/${user.uid}`);
+
+         set(userStatusRef, {
+            state: 'offline',
+            last_changed: Date.now(),
+         }).then(() => {
+            signOut(auth)
+               .then(() => {
+                  console.log('User logged out');
+               })
+               .catch((error) => {
+                  console.error('Error logging out: ', error);
+               });
+         });
+      }
+   };
+
    const menuItems = [
       {
          key: 'create-room',
@@ -111,9 +136,7 @@ export default function UserInfo() {
          key: 'logout',
          icon: <StyledLogoutIcon />,
          label: <StyledMenuItem> Logout </StyledMenuItem>,
-         onClick: () => {
-            signOut(auth);
-         },
+         onClick: handleLogout,
          style: { color: '#ff1b1b' },
       },
    ];
@@ -179,14 +202,15 @@ export default function UserInfo() {
    return (
       <WrapperStyled>
          <UserInfoStyled>
-            {displayName ? (
-               <Avatar src={photoURL} size={40}>
-                  {photoURL ? '' : displayName?.charAt(0)?.toUpperCase()}
-               </Avatar>
-            ) : (
-               <Avatar icon={<UserOutlined />} size={40} alt='Error' />
-            )}
-
+            <CustomBadge status={status}>
+               {displayName ? (
+                  <Avatar src={photoURL} size={40}>
+                     {photoURL ? '' : displayName?.charAt(0)?.toUpperCase()}
+                  </Avatar>
+               ) : (
+                  <Avatar icon={<UserOutlined />} size={40} alt='Error' />
+               )}
+            </CustomBadge>
             <Typography.Text className='username'>
                {displayName ?? 'Anonymous'}
             </Typography.Text>
@@ -225,6 +249,7 @@ const WrapperStyled = styled.div`
    display: flex;
    flex-wrap: wrap;
    padding: 0.4rem 1.2rem;
+   margin-top: 4px;
    border-bottom: 1px solid #eee;
    align-items: center;
    position: relative;
