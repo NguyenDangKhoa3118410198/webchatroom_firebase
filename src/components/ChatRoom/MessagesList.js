@@ -28,9 +28,10 @@ export const MessagesList = ({
             const showDivider = messageDate !== lastDate && lastDate !== '';
 
             lastDate = messageDate;
-            if (seen && seen[uid] === false && !nofityNewMess) {
+            if (seen && seen[currentUid] === false && !nofityNewMess) {
                setNotifyNewMess(true);
             }
+
             return (
                <React.Fragment key={id}>
                   {showDivider && (
